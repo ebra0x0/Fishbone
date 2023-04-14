@@ -1,0 +1,64 @@
+{
+    "expo": {
+        "name": "Biteback",
+        "slug": "Biteback",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./Local/icon.png",
+        "userInterfaceStyle": "automatic",
+        "notification": {
+            "icon": "./Local/notification-icon.png"
+        },
+        "splash": {
+            "image": "./Local/splash.png",
+            "resizeMode": "cover",
+            "backgroundColor": "#000000"
+        },
+        "updates": {
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "supportsTablet": true
+        },
+        "android": {
+            "googleServicesFile": "./google-services.json",
+            "config": {
+                "googleMaps": {
+                    "apiKey": "AIzaSyA0dCX-p3I0gOslY20DsnEftlu-vRLxNuY"
+                }
+            },
+            "adaptiveIcon": {
+                "foregroundImage": "./Local/adaptive-icon.png",
+                "backgroundColor": "#000000"
+            },
+            "package": "com.Biteback.com"
+        },
+        "web": {
+            "favicon": "./Local/favicon.png"
+        },
+        "extra": {
+            "eas": {
+                "projectId": "c41a46f3-2cb9-4610-983d-08f3f77f1748"
+            }
+        },
+        "plugins": [
+            "@react-native-google-signin/google-signin",
+            [
+                "react-native-fbsdk-next",
+                {
+                    "appID": "712987323689799",
+                    "clientToken": "3249a79422f98cabe5b59f13c8bb7d6a",
+                    "displayName": "Biteback"
+                }
+            ],
+            [
+                "expo-notifications",
+                {
+                    "icon": "./Local/notification-icon.png",
+                    "color": "#ffffff"
+                }
+            ]
+        ]
+    }
+}
