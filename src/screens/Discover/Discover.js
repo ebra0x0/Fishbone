@@ -137,7 +137,7 @@ export default () => {
 
     const POSTS_HANDLER = (posts) => {
         const nearPosts = posts.filter(
-            (post) => __Get_Distance__(post.location, true) / 1000 <= 4 //>>4000km
+            (post) => __Get_Distance__(post.location, true) / 1000 <= 4 //>>4km
         );
         nearPosts.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
 
