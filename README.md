@@ -1,5 +1,5 @@
 # Fishbone
-## Restaurant Leftovers App The Restaurant Leftovers App is a mobile application that connects restaurants with users who are want to help stary animals with leftover food.
+## Restaurant Leftovers App is a mobile application that connects restaurants with users who are want to help stary animals with leftover food.
 ### The app allows restaurants to post their leftover food items with details such as the type of food, pickup time, and pickup location.
 ### Users can discover available food items by browsing through the app, filtering results by location and food type, and viewing details.
 ### They can then place an order for the food item and arrange for pickup at the restaurant's location.
