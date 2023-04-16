@@ -137,12 +137,12 @@ export default () => {
 
     const POSTS_HANDLER = (posts) => {
         const nearPosts = posts.filter(
-            (post) => __Get_Distance__(post.location, true) / 1000 <= 20 //>>4000km
+            (post) => __Get_Distance__(post.location, true) / 1000 <= 4 //>>4000km
         );
         nearPosts.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
 
         const newPosts = posts.filter(
-            (post) => parseInt(__Get_Elapsed__(post.date, true) / (1000 * 60)) <= 160 //>>1h
+            (post) => parseInt(__Get_Elapsed__(post.date, true) / (1000 * 60)) <= 60 //>>1h
         );
         newPosts.sort((a, b) => parseInt(a.elapsed) - parseInt(b.elapsed));
 
