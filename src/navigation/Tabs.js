@@ -146,16 +146,23 @@ const Tabs = () => {
     const Fetch_Favorites = () => {
         try {
             const $favRef = firestore().collection("users").doc(data?.id).collection("favorites");
+            const $UsersRef = firestore().collection("users");
 
             $favRef.get().then((querySnapshot) => {
                 if (querySnapshot?.size) {
                     const newFavs = [];
                     querySnapshot.forEach(async (doc, indx) => {
-                        newFavs.push({
-                            ...doc.data(),
-                            key: doc.id,
-                        });
+                        const { id } = doc.data();
 
+                        await $UsersRef
+                            .doc(id)
+                            .get()
+                            .then((user) => {
+                                newFavs.push({
+                                    ...user.data(),
+                                    key: doc.id,
+                                });
+                            });
                         if (indx + 1 == querySnapshot.size) {
                             dispatch({ type: "userData/Set_Favorites", payload: newFavs });
                         }

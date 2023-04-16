@@ -66,7 +66,7 @@ const Translations = () => {
             Now: "الأن",
             flheaderAvl: "متاح",
             flheaderRec: "الأقرب",
-            flheaderNew: "منشورات حديدة",
+            flheaderNew: "منشورات جديدة",
             flheaderFav: "مفضلاتك",
             currlocationChoose: "اختر موقعك",
             currlocationCurrent: "الموقع الحالي",

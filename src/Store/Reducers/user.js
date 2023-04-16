@@ -49,7 +49,12 @@ const Delete_Favorites = (deletedFavs, user) => {
 
     if (deletedFavs.length) {
         deletedFavs.forEach((fav) => {
-            $favRef.doc(fav.key).delete();
+            $favRef
+                .where("id", "==", fav.id)
+                .get()
+                .then((docs) => {
+                    docs.forEach((doc) => doc.ref.delete());
+                });
         });
     }
 };

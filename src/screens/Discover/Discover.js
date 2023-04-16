@@ -95,34 +95,14 @@ export default () => {
                 new: { x: 0, y: 0 },
                 favs: { x: 0, y: 0 },
             });
+            FavPost_activator();
         }
     }, [POSTS.length]);
     useEffect(() => {
         userPost && Add_User_Post();
     }, [userPost]);
     useEffect(() => {
-        try {
-            if (!data?.restaurant && POSTS.length) {
-                if (favorites.length) {
-                    const updatedPosts = POSTS.map((post) => {
-                        const newPost = { ...post };
-                        const isFav = favorites.some((fav) => fav.id === post.id);
-                        newPost.fav = isFav;
-                        return newPost;
-                    });
-                    setPosts(updatedPosts);
-                } else {
-                    const updatedPosts = POSTS.map((post) => {
-                        const newPost = { ...post };
-                        newPost.fav = false;
-                        return newPost;
-                    });
-                    setPosts(updatedPosts);
-                }
-            }
-        } catch (e) {
-            console.log(e);
-        }
+        FavPost_activator();
     }, [favorites]);
     useEffect(() => {
         if (deviceLocation && POSTS.length) {
@@ -182,6 +162,32 @@ export default () => {
         });
 
         return isFav;
+    };
+
+    const FavPost_activator = () => {
+        try {
+            if (!data?.restaurant && POSTS.length) {
+                if (favorites.length) {
+                    const updatedPosts = POSTS.map((post) => {
+                        const newPost = { ...post };
+                        const isFav = favorites.some((fav) => fav.id === post.id);
+                        newPost.fav = isFav;
+                        return newPost;
+                    });
+
+                    setPosts(updatedPosts);
+                } else {
+                    const updatedPosts = POSTS.map((post) => {
+                        const newPost = { ...post };
+                        newPost.fav = false;
+                        return newPost;
+                    });
+                    setPosts(updatedPosts);
+                }
+            }
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const TrackLocation = async () => {
@@ -543,12 +549,15 @@ export default () => {
     const Toggle_Fav = (rest) => {
         try {
             if (rest.fav) {
-                const newFavs = favorites.filter((fav) => fav.id !== rest.id);
+                const updatedFavs = favorites.filter((fav) => fav.id !== rest.id);
                 dispatch({ type: "userData/Del_Favorites", payload: [rest] });
-                dispatch({ type: "userData/Set_Favorites", payload: newFavs });
+                dispatch({ type: "userData/Set_Favorites", payload: updatedFavs });
             } else {
                 const newFavs = [...favorites, rest];
-                dispatch({ type: "userData/Update_Favorites", payload: [rest] });
+                const favReq = {
+                    id: rest.id,
+                };
+                dispatch({ type: "userData/Update_Favorites", payload: [favReq] });
                 dispatch({ type: "userData/Set_Favorites", payload: newFavs });
             }
         } catch (e) {
@@ -788,28 +797,24 @@ export default () => {
             );
         };
         const renderEmptyList = () => {
-            if (!POSTS.length) {
-                return (
-                    <View
-                        style={{
-                            flex: 1,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            marginBottom: 30,
-                        }}
-                    >
-                        <Image
-                            style={{ width: 100, height: 100, marginBottom: 10 }}
-                            source={require("../../../assets/lock.png")}
-                        />
-                        <Text style={{ color: "#7d7d7d", fontSize: 16, fontWeight: "bold" }}>
-                            {CONTENT.homeEmptyPosts}
-                        </Text>
-                    </View>
-                );
-            } else {
-                return null;
-            }
+            return (
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginBottom: 30,
+                    }}
+                >
+                    <Image
+                        style={{ width: 100, height: 100, marginBottom: 10 }}
+                        source={require("../../../assets/lock.png")}
+                    />
+                    <Text style={{ color: "#7d7d7d", fontSize: 16, fontWeight: "bold" }}>
+                        {CONTENT.homeEmptyPosts}
+                    </Text>
+                </View>
+            );
         };
         const onRefresh = async () => {
             setRefreshing(true);
@@ -827,7 +832,15 @@ export default () => {
                         style={Styles.scrollView}
                         contentOffset={scrollOffsets.main}
                         onMomentumScrollEnd={(e) => SaveScroll(e.nativeEvent.contentOffset, "Main")}
-                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                        refreshControl={
+                            <RefreshControl
+                                colors={["#1785f5"]}
+                                progressBackgroundColor={theme ? "#001837" : "#ffffff"}
+                                progressViewOffset={30}
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
                         ListEmptyComponent={renderEmptyList}
                         contentContainerStyle={
                             !POSTS.length
@@ -897,20 +910,28 @@ export default () => {
                             false
                         )}
 
-                        <Text style={Styles.postsHeader}>{CONTENT.flheaderAvl}</Text>
-                        <FlatList
-                            style={Styles.flatList}
-                            data={POSTS}
-                            renderItem={renderPost}
-                            keyExtractor={(item) => item.key}
-                            horizontal={true}
-                            contentOffset={scrollOffsets.available}
-                            onMomentumScrollEnd={(e) => SaveScroll(e.nativeEvent.contentOffset, "available")}
-                            showsHorizontalScrollIndicator={false}
-                            onEndReached={Fetch_More}
-                            onEndReachedThreshold={0.5}
-                            removeClippedSubviews={false}
-                        />
+                        {POSTS.length ? (
+                            <>
+                                <Text style={Styles.postsHeader}>{CONTENT.flheaderAvl}</Text>
+                                <FlatList
+                                    style={Styles.flatList}
+                                    data={POSTS}
+                                    renderItem={renderPost}
+                                    keyExtractor={(item) => item.key}
+                                    horizontal={true}
+                                    contentOffset={scrollOffsets.available}
+                                    onMomentumScrollEnd={(e) =>
+                                        SaveScroll(e.nativeEvent.contentOffset, "available")
+                                    }
+                                    showsHorizontalScrollIndicator={false}
+                                    onEndReached={Fetch_More}
+                                    onEndReachedThreshold={0.5}
+                                    removeClippedSubviews={false}
+                                />
+                            </>
+                        ) : (
+                            false
+                        )}
 
                         {favPosts.length ? (
                             <>

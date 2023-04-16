@@ -150,13 +150,13 @@ const CreatePost = ({ navigation }) => {
                 setLoading(true);
                 Keyboard.dismiss();
 
-                const imgUrl = await uploadImage(image);
-
                 await $Posts_Ref
                     .where("source", "==", data?.id)
                     .get()
                     .then(async (posts) => {
                         if (posts.size === 0) {
+                            const imgUrl = await uploadImage(image);
+
                             const timestamp = firestore.FieldValue.serverTimestamp();
                             const now = firestore.Timestamp.now();
                             const closedIn = firestore.Timestamp.fromDate(closedTime.value);
@@ -168,7 +168,13 @@ const CreatePost = ({ navigation }) => {
                                 foodType,
                                 postDesc,
                                 closedIn,
-                                ...data,
+                                id: data?.id,
+                                Name: data?.Name,
+                                address: data?.address,
+                                email: data?.email,
+                                location: data?.location,
+                                phone: data?.phone,
+                                photo: data?.photo,
                             };
                             //Save post to global posts
                             await $Posts_Ref.add($ReqData).then(async (newPost) => {

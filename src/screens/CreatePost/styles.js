@@ -12,7 +12,7 @@ const styles = () => {
         },
         wrapper: {
             paddingHorizontal: 30,
-            minHeight: 600,
+            minHeight: 580,
         },
         pickImageBtn: {
             width: "100%",

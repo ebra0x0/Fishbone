@@ -21,7 +21,7 @@ import SendNotification from "../../Components/SendNotification";
 import { Toast } from "native-base";
 import ALert from "../../Components/Alert/Alert";
 
-export default (props) => {
+export default () => {
     const styles = Styles();
     const { data, theme } = useSelector((state) => state.user);
     const [Orders, setOrders] = useState([]);
@@ -484,7 +484,15 @@ export default (props) => {
                         onEndReached={Fetch_More}
                         onEndReachedThreshold={0.5}
                         showsVerticalScrollIndicator={false}
-                        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                        refreshControl={
+                            <RefreshControl
+                                colors={["#1785f5"]}
+                                progressBackgroundColor={theme ? "#001837" : "#ffffff"}
+                                progressViewOffset={30}
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
                         ListEmptyComponent={renderEmptyList}
                         contentContainerStyle={
                             !Orders.length

@@ -22,8 +22,12 @@ const OpenProfile = ({ navigation, route }) => {
 
     const Fav_Detector = (source) => {
         if (favorites.length) {
-            favorites.forEach((fav) => {
-                fav.id == source ? setIsFav(true) : setIsFav(false);
+            favorites.forEach((fav, indx) => {
+                if (fav.id === source) {
+                    setIsFav(true);
+                } else {
+                    indx + 1 == favorites.length && isFav == null && setIsFav(false);
+                }
             });
         } else {
             setIsFav(false);
@@ -37,7 +41,7 @@ const OpenProfile = ({ navigation, route }) => {
             };
             if (isFav) {
                 const newFavs = [];
-                favorites.forEach((fav, indx) => {
+                favorites.forEach((fav) => {
                     if (fav.id !== Data.id) {
                         newFavs.push(fav);
                     } else {
@@ -47,7 +51,10 @@ const OpenProfile = ({ navigation, route }) => {
                     }
                 });
             } else {
-                dispatch({ type: "userData/Update_Favorites", payload: [favData] });
+                const favReq = {
+                    id: rest.id,
+                };
+                dispatch({ type: "userData/Update_Favorites", payload: [favReq] });
                 setIsFav(true);
                 if (favorites.length) {
                     dispatch({ type: "userData/Set_Favorites", payload: [...favorites, favData] });
