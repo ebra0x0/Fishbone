@@ -214,12 +214,13 @@ export default () => {
             const newOrders = [];
             Orders.forEach((order) => {
                 if (order.key == orderId) {
-                    newOrders.push({ ...order, ...approvalData, approvalDate: now });
+                    newOrders.push({ ...order, ...approvalData, approvalDate: now, elapsed: CONTENT.Now });
                 } else {
                     newOrders.push(order);
                 }
             });
             setOrders(newOrders);
+            setHasPindingOrders(false);
         } catch (e) {
             console.log(e);
         }

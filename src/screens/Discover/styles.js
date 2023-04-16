@@ -14,9 +14,10 @@ const styles = () => {
         },
         scrollView: {
             paddingHorizontal: 10,
+            marginTop: 10,
         },
         flatList: {
-            marginBottom: 20,
+            marginBottom: 30,
         },
         postsHeader: {
             textAlign: "left",

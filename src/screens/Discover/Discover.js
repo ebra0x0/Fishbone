@@ -137,12 +137,12 @@ export default () => {
 
     const POSTS_HANDLER = (posts) => {
         const nearPosts = posts.filter(
-            (post) => __Get_Distance__(post.location, true) / 1000 <= 4 //>>4000km
+            (post) => __Get_Distance__(post.location, true) / 1000 <= 20 //>>4000km
         );
         nearPosts.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
 
         const newPosts = posts.filter(
-            (post) => parseInt(__Get_Elapsed__(post.date, true) / (1000 * 60)) <= 60 //>>1h
+            (post) => parseInt(__Get_Elapsed__(post.date, true) / (1000 * 60)) <= 160 //>>1h
         );
         newPosts.sort((a, b) => parseInt(a.elapsed) - parseInt(b.elapsed));
 
@@ -841,119 +841,121 @@ export default () => {
                                 onRefresh={onRefresh}
                             />
                         }
-                        ListEmptyComponent={renderEmptyList}
                         contentContainerStyle={
                             !POSTS.length
                                 ? { flex: 1, justifyContent: "center", alignItems: "center" }
                                 : false
                         }
                     >
-                        {recPosts.length ? (
-                            <>
-                                <Text style={Styles.postsHeader}>{CONTENT.flheaderRec}</Text>
-
-                                <FlatList
-                                    style={Styles.flatList}
-                                    data={recPosts}
-                                    renderItem={renderPost}
-                                    keyExtractor={(item) => item.key}
-                                    horizontal={true}
-                                    contentOffset={scrollOffsets.recommended}
-                                    onMomentumScrollEnd={(e) =>
-                                        SaveScroll(e.nativeEvent.contentOffset, "recommended")
-                                    }
-                                    showsHorizontalScrollIndicator={false}
-                                    onEndReached={Fetch_More}
-                                    onEndReachedThreshold={0.5}
-                                    removeClippedSubviews={false}
-                                />
-                            </>
-                        ) : (
-                            false
-                        )}
-
-                        {newPosts.length ? (
-                            <>
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                        marginBottom: 7,
-                                    }}
-                                >
-                                    <Image
-                                        style={{ width: 25, height: 25, marginRight: 6 }}
-                                        source={require("../../../assets/new.png")}
-                                    />
-                                    <Text style={[Styles.postsHeader, { marginBottom: 0 }]}>
-                                        {CONTENT.flheaderNew}
-                                    </Text>
-                                </View>
-
-                                <FlatList
-                                    style={Styles.flatList}
-                                    data={newPosts}
-                                    renderItem={renderPost}
-                                    keyExtractor={(item) => item.key}
-                                    horizontal={true}
-                                    contentOffset={scrollOffsets.new}
-                                    onMomentumScrollEnd={(e) =>
-                                        SaveScroll(e.nativeEvent.contentOffset, "new")
-                                    }
-                                    showsHorizontalScrollIndicator={false}
-                                    onEndReached={Fetch_More}
-                                    onEndReachedThreshold={0.5}
-                                    removeClippedSubviews={false}
-                                />
-                            </>
-                        ) : (
-                            false
-                        )}
-
                         {POSTS.length ? (
                             <>
-                                <Text style={Styles.postsHeader}>{CONTENT.flheaderAvl}</Text>
-                                <FlatList
-                                    style={Styles.flatList}
-                                    data={POSTS}
-                                    renderItem={renderPost}
-                                    keyExtractor={(item) => item.key}
-                                    horizontal={true}
-                                    contentOffset={scrollOffsets.available}
-                                    onMomentumScrollEnd={(e) =>
-                                        SaveScroll(e.nativeEvent.contentOffset, "available")
-                                    }
-                                    showsHorizontalScrollIndicator={false}
-                                    onEndReached={Fetch_More}
-                                    onEndReachedThreshold={0.5}
-                                    removeClippedSubviews={false}
-                                />
+                                {recPosts.length ? (
+                                    <>
+                                        <Text style={Styles.postsHeader}>{CONTENT.flheaderRec}</Text>
+                                        <FlatList
+                                            style={Styles.flatList}
+                                            data={recPosts}
+                                            renderItem={renderPost}
+                                            keyExtractor={(item) => item.key}
+                                            horizontal={true}
+                                            contentOffset={scrollOffsets.recommended}
+                                            onMomentumScrollEnd={(e) =>
+                                                SaveScroll(e.nativeEvent.contentOffset, "recommended")
+                                            }
+                                            showsHorizontalScrollIndicator={false}
+                                            onEndReached={Fetch_More}
+                                            onEndReachedThreshold={0.5}
+                                            removeClippedSubviews={false}
+                                        />
+                                    </>
+                                ) : (
+                                    false
+                                )}
+
+                                {newPosts.length ? (
+                                    <>
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                alignItems: "center",
+                                                marginBottom: 7,
+                                            }}
+                                        >
+                                            <Image
+                                                style={{ width: 25, height: 25, marginRight: 6 }}
+                                                source={require("../../../assets/new.png")}
+                                            />
+                                            <Text style={[Styles.postsHeader, { marginBottom: 0 }]}>
+                                                {CONTENT.flheaderNew}
+                                            </Text>
+                                        </View>
+                                        <FlatList
+                                            style={Styles.flatList}
+                                            data={newPosts}
+                                            renderItem={renderPost}
+                                            keyExtractor={(item) => item.key}
+                                            horizontal={true}
+                                            contentOffset={scrollOffsets.new}
+                                            onMomentumScrollEnd={(e) =>
+                                                SaveScroll(e.nativeEvent.contentOffset, "new")
+                                            }
+                                            showsHorizontalScrollIndicator={false}
+                                            onEndReached={Fetch_More}
+                                            onEndReachedThreshold={0.5}
+                                            removeClippedSubviews={false}
+                                        />
+                                    </>
+                                ) : (
+                                    false
+                                )}
+
+                                {POSTS.length ? (
+                                    <>
+                                        <Text style={Styles.postsHeader}>{CONTENT.flheaderAvl}</Text>
+                                        <FlatList
+                                            style={Styles.flatList}
+                                            data={POSTS}
+                                            renderItem={renderPost}
+                                            keyExtractor={(item) => item.key}
+                                            horizontal={true}
+                                            contentOffset={scrollOffsets.available}
+                                            onMomentumScrollEnd={(e) =>
+                                                SaveScroll(e.nativeEvent.contentOffset, "available")
+                                            }
+                                            showsHorizontalScrollIndicator={false}
+                                            onEndReached={Fetch_More}
+                                            onEndReachedThreshold={0.5}
+                                            removeClippedSubviews={false}
+                                        />
+                                    </>
+                                ) : (
+                                    false
+                                )}
+
+                                {favPosts.length ? (
+                                    <>
+                                        <Text style={Styles.postsHeader}>{CONTENT.flheaderFav}</Text>
+                                        <FlatList
+                                            data={favPosts}
+                                            renderItem={renderPost}
+                                            keyExtractor={(item) => item.key}
+                                            horizontal={true}
+                                            contentOffset={scrollOffsets.favs}
+                                            onMomentumScrollEnd={(e) =>
+                                                SaveScroll(e.nativeEvent.contentOffset, "favs")
+                                            }
+                                            showsHorizontalScrollIndicator={false}
+                                            onEndReached={Fetch_More}
+                                            onEndReachedThreshold={0.5}
+                                            removeClippedSubviews={false}
+                                        />
+                                    </>
+                                ) : (
+                                    false
+                                )}
                             </>
                         ) : (
-                            false
-                        )}
-
-                        {favPosts.length ? (
-                            <>
-                                <Text style={Styles.postsHeader}>{CONTENT.flheaderFav}</Text>
-
-                                <FlatList
-                                    data={favPosts}
-                                    renderItem={renderPost}
-                                    keyExtractor={(item) => item.key}
-                                    horizontal={true}
-                                    contentOffset={scrollOffsets.favs}
-                                    onMomentumScrollEnd={(e) =>
-                                        SaveScroll(e.nativeEvent.contentOffset, "favs")
-                                    }
-                                    showsHorizontalScrollIndicator={false}
-                                    onEndReached={Fetch_More}
-                                    onEndReachedThreshold={0.5}
-                                    removeClippedSubviews={false}
-                                />
-                            </>
-                        ) : (
-                            false
+                            renderEmptyList()
                         )}
                     </ScrollView>
                 )}
