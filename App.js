@@ -53,21 +53,22 @@ const App = () => {
         Notifications_Handelr();
         Notifications_Listeners();
 
-        auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                await Get_User(user);
+        auth().onAuthStateChanged(async (session) => {
+            if (session) {
+                await Get_User(session);
             } else {
                 setUserData(null);
+                store.dispatch({ type: "userData/Del_User" });
+                setBooting(false);
             }
         });
     }, []);
     useEffect(() => {
-        if (userData) {
+        if (userData && auth().currentUser) {
             setLogged(true);
             setBooting(false);
         } else {
             setLogged(false);
-            store.dispatch({ type: "userData/Del_User" });
         }
     }, [userData]);
     useEffect(() => {
@@ -75,9 +76,7 @@ const App = () => {
     }, [msg]);
 
     useEffect(() => {
-        if (Token) {
-            store.dispatch({ type: "userData/Set_Token", payload: Token });
-        }
+        Token && store.dispatch({ type: "userData/Set_Token", payload: Token });
     }, [Token]);
 
     //Functions
@@ -132,16 +131,15 @@ const App = () => {
 
     const Get_User = async (user) => {
         try {
-            usersRef.doc(user?.uid).onSnapshot((querySnapshot) => {
-                if (user) {
+            usersRef
+                .doc(user?.uid)
+                .get()
+                .then((querySnapshot) => {
                     if (querySnapshot?.exists) {
                         store.dispatch({ type: "userData/Set_User", payload: querySnapshot?.data() });
                         setUserData(querySnapshot?.data());
-                    } else {
-                        setBooting(false);
                     }
-                }
-            });
+                });
         } catch (e) {
             console.log(e);
         }
@@ -166,12 +164,6 @@ const App = () => {
                 const item = await AsyncStorage.getItem(key);
 
                 switch (key) {
-                    case "User":
-                        if (item) {
-                            setUserData(JSON.parse(item));
-                            store.dispatch({ type: "userData/Set_User", payload: JSON.parse(item) });
-                        }
-                        break;
                     case "THEME":
                         store.dispatch({ type: "userData/Set_Theme", payload: JSON.parse(item) });
                         break;
@@ -185,12 +177,12 @@ const App = () => {
 
     const onStoreChanged = () => {
         store.subscribe(() => {
-            const { theme, data, hasUnconfirmedOrder } = store.getState().user;
+            const { theme, hasUnconfirmedOrder } = store.getState().user;
             setTheme(theme);
-            setUserData(data);
             setConfPhoto(hasUnconfirmedOrder);
         });
     };
+
     NavigationBar.setBackgroundColorAsync(theme ? "#00152d" : "#ccc");
 
     return (

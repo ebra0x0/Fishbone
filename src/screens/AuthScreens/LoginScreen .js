@@ -18,7 +18,7 @@ import auth from "@react-native-firebase/auth";
 import Google_Authinticator from "../../Components/AuthinticationProviders/Google_Authinticator";
 import FB_Authinticator from "../../Components/AuthinticationProviders/FB_Authinticator";
 import Reset_Pass from "../Reset_Pass/Reset_Pass";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useSelector } from "react-redux";
 

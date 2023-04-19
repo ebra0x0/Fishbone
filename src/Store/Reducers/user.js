@@ -5,14 +5,6 @@ import firestore from "@react-native-firebase/firestore";
 
 const __UPDATE_USER_STORAGE__ = (action, payload) => {
     switch (action) {
-        case "SET_USER":
-            payload && AsyncStorage.setItem("User", JSON.stringify(payload));
-            break;
-        case "DEL_USER":
-            AsyncStorage.removeItem("User");
-            AsyncStorage.removeItem("UserPost");
-            AsyncStorage.removeItem("UserOrder");
-            break;
         case "SET_POST":
             payload && AsyncStorage.setItem("UserPost", JSON.stringify(payload));
             break;
@@ -73,15 +65,12 @@ export const User = createSlice({
     },
     reducers: {
         Set_User: (state, action) => {
-            __UPDATE_USER_STORAGE__("SET_USER", { ...state.data, ...action.payload });
-
             return {
                 ...state,
                 data: { ...state.data, ...action.payload },
             };
         },
         Del_User: (state) => {
-            __UPDATE_USER_STORAGE__("DEL_USER");
             return {
                 ...state,
                 data: null,
