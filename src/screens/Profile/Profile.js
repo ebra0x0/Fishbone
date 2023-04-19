@@ -108,7 +108,7 @@ export default () => {
                         />
                     )}
 
-                    <Avatar />
+                    <Avatar upload={true} />
 
                     <Text style={Styles.titleName}>{data?.Name || "User Name"}</Text>
                 </View>

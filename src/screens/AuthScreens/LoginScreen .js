@@ -28,8 +28,8 @@ export default () => {
     const MAIN = ({ navigation }) => {
         const { lang, theme } = useSelector((state) => state.user);
         const Styles = styles();
-        const [email, setEmail] = useState({ value: "", valid: null });
-        const [password, setPassword] = useState({ value: "", valid: null });
+        const [email, setEmail] = useState({ value: "", valid: null, error: "" });
+        const [password, setPassword] = useState({ value: "", valid: null, error: "" });
         const [actvBtn, setActvBtn] = useState(false);
         const [hidePass, setHidePass] = useState(true);
         const [loading, setLoading] = useState(false);
@@ -58,16 +58,20 @@ export default () => {
                 setEmail((prev) => {
                     return { ...prev, valid: false };
                 });
+                setActvInput((prev) => {
+                    return { ...prev, email: "active" };
+                });
                 if (out) {
                     setActvInput((prev) => {
                         return { ...prev, email: "bad" };
                     });
-                    setErrMsg("Oh no! This email is invalid");
+                    setEmail((prev) => {
+                        return { ...prev, error: "Oh no! This email is invalid" };
+                    });
                 }
             } else {
-                setErrMsg("");
                 setEmail((prev) => {
-                    return { ...prev, valid: true };
+                    return { ...prev, valid: true, error: "" };
                 });
                 setActvInput((prev) => {
                     return { ...prev, email: "" };
@@ -77,27 +81,25 @@ export default () => {
         const passwordValidation = (pass, out) => {
             const passRegex = new RegExp("[a-zA-Z0-9~!@#$%^&*.()_/=+]{8,15}");
 
-            if (email.valid) {
-                if (!pass.match(passRegex)) {
-                    setPassword((prev) => {
-                        return { ...prev, valid: false };
-                    });
-                    if (out) {
-                        setActvInput((prev) => {
-                            return { ...prev, pass: "bad" };
-                        });
-                        setErrMsg("No! This field is requires at least 8 characters.");
-                    }
-                } else {
-                    setErrMsg("");
-                    setPassword((prev) => {
-                        return { ...prev, valid: true };
-                    });
+            if (!pass.match(passRegex)) {
+                setPassword((prev) => {
+                    return { ...prev, valid: false };
+                });
+                setActvInput((prev) => {
+                    return { ...prev, pass: "active" };
+                });
+                if (out) {
                     setActvInput((prev) => {
-                        return { ...prev, pass: "" };
+                        return { ...prev, pass: "bad" };
+                    });
+                    setPassword((prev) => {
+                        return { ...prev, error: "No! This field is requires at least 8 characters." };
                     });
                 }
             } else {
+                setPassword((prev) => {
+                    return { ...prev, valid: true, error: "" };
+                });
                 setActvInput((prev) => {
                     return { ...prev, pass: "" };
                 });
@@ -189,6 +191,7 @@ export default () => {
                             emailValidation(email.value, true);
                         }}
                     />
+                    {email.error && <Text style={{ color: "#ff4a4a", fontSize: 12 }}>{email.error}</Text>}
                     <View style={{ justifyContent: "center" }}>
                         <TextInput
                             style={[
@@ -231,8 +234,11 @@ export default () => {
                             />
                         </TouchableOpacity>
                     </View>
+                    {password.error && (
+                        <Text style={{ color: "#ff4a4a", fontSize: 12 }}>{password.error}</Text>
+                    )}
 
-                    <TouchableOpacity onPress={() => navigation.navigate("resetPass")}>
+                    <TouchableOpacity style={{ width: 160 }} onPress={() => navigation.navigate("resetPass")}>
                         <Text style={{ fontSize: 16, color: "#1785f5", marginRight: 7 }}>
                             {Translations().t("signinForgotPass")}
                         </Text>

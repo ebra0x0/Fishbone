@@ -7,10 +7,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 
-const Avatar = () => {
+const Avatar = (props) => {
     const Styles = styles();
     const { data } = useSelector((state) => state.user);
     const [image, setImage] = useState(data?.photo);
+
+    const { upload } = props;
 
     const dispatch = useDispatch();
 
@@ -25,7 +27,7 @@ const Avatar = () => {
         if (!result.canceled) {
             setImage(result.assets[0].uri);
             dispatch({ type: "userData/Set_User", payload: { photo: result.assets[0].uri } });
-            uploadImage(result.assets[0].uri);
+            upload && uploadImage(result.assets[0].uri);
         }
     };
 
@@ -59,7 +61,7 @@ const Avatar = () => {
                         source={{ uri: image || !data?.photo }}
                     />
                 ) : (
-                    <Ionicons style={{ paddingLeft: 4 }} name="add-outline" size={60} color="#838383" />
+                    <Ionicons style={{ paddingLeft: 4 }} name="add-outline" size={60} color="#b7b7b7" />
                 )}
             </View>
         </TouchableOpacity>

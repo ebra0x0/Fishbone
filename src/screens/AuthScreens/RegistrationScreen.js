@@ -58,6 +58,9 @@ export default ({ navigation }) => {
             setEmail((prev) => {
                 return { ...prev, valid: false };
             });
+            setActvInput((prev) => {
+                return { ...prev, email: "active" };
+            });
             if (out) {
                 setActvInput((prev) => {
                     return { ...prev, email: "bad" };
@@ -68,10 +71,7 @@ export default ({ navigation }) => {
             }
         } else {
             setEmail((prev) => {
-                return { ...prev, error: "" };
-            });
-            setEmail((prev) => {
-                return { ...prev, valid: true };
+                return { ...prev, valid: true, error: "" };
             });
             setActvInput((prev) => {
                 return { ...prev, email: "right" };
@@ -85,15 +85,17 @@ export default ({ navigation }) => {
             setPassword((prev) => {
                 return { ...prev, valid: false };
             });
-            setRePassword((prev) => {
-                return { ...prev, valid: false };
+            setActvInput((prev) => {
+                return { ...prev, pass: "active" };
             });
+            rePass.valid !== null &&
+                setRePassword((prev) => {
+                    return { ...prev, valid: false };
+                });
+
             if (out) {
                 setActvInput((prev) => {
-                    return { ...prev, pass: "bad" };
-                });
-                setActvInput((prev) => {
-                    return { ...prev, repass: "bad" };
+                    return { ...prev, pass: "bad", repass: "bad" };
                 });
                 setPassword((prev) => {
                     return { ...prev, error: "Weak password: make it stronger at least 8 characters" };
@@ -101,33 +103,29 @@ export default ({ navigation }) => {
             }
         } else {
             setPassword((prev) => {
-                return { ...prev, error: "" };
+                return { ...prev, error: "", valid: true };
             });
 
-            setPassword((prev) => {
-                return { ...prev, valid: true };
-            });
             setActvInput((prev) => {
                 return { ...prev, pass: "right" };
             });
 
-            if (rePass.value !== pass) {
-                setRePassword((prev) => {
-                    return { ...prev, valid: false, error: "Ops, Password don't match" };
-                });
-                setActvInput((prev) => {
-                    return { ...prev, repass: "bad" };
-                });
-            } else {
-                setRePassword((prev) => {
-                    return { ...prev, valid: true };
-                });
-                setActvInput((prev) => {
-                    return { ...prev, repass: "right" };
-                });
-                setRePassword((prev) => {
-                    return { ...prev, valid: false, error: "" };
-                });
+            if (rePass.valid !== null) {
+                if (rePass.value !== pass) {
+                    setRePassword((prev) => {
+                        return { ...prev, valid: false, error: "Ops, Password don't match" };
+                    });
+                    setActvInput((prev) => {
+                        return { ...prev, repass: "bad" };
+                    });
+                } else {
+                    setRePassword((prev) => {
+                        return { ...prev, valid: true, error: "" };
+                    });
+                    setActvInput((prev) => {
+                        return { ...prev, repass: "right" };
+                    });
+                }
             }
         }
     };
@@ -136,6 +134,9 @@ export default ({ navigation }) => {
             if (rePass !== password.value) {
                 setRePassword((prev) => {
                     return { ...prev, valid: false };
+                });
+                setActvInput((prev) => {
+                    return { ...prev, repass: "active" };
                 });
                 if (out) {
                     setActvInput((prev) => {
@@ -155,11 +156,8 @@ export default ({ navigation }) => {
                 });
             }
         } else {
-            setActvInput((prev) => {
-                return { ...prev, pass: "bad" };
-            });
-            setPassword((prev) => {
-                return { ...prev, error: "Weak password: make it stronger at least 8 characters" };
+            setRePassword((prev) => {
+                return { ...prev, valid: false };
             });
         }
     };
@@ -208,6 +206,12 @@ export default ({ navigation }) => {
                     <Text style={Styles.headerTxt}>{Translations().t("signupTitle")}</Text>
                     <Text style={{ fontSize: 16, color: "#6e6e6e" }}>{Translations().t("signupDesc")}</Text>
                 </View>
+
+                {errMsg && (
+                    <View style={Styles.errMsg}>
+                        <Text style={Styles.errMsgTxt}>{errMsg}</Text>
+                    </View>
+                )}
 
                 <TextInput
                     style={[Styles.input, ActiveThem[actvInput.email]]}

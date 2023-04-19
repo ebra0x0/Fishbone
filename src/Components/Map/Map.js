@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import MapView, { PROVIDER_GOOGLE, Marker } from "react-native-maps";
 import mapStyle from "./mapStyle";
 import styles from "./styles";
-import { StyleSheet, View, TouchableOpacity, Text, Dimensions, Alert, Linking } from "react-native";
+import { View, TouchableOpacity, Text, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,16 +18,6 @@ const Map = (props) => {
 
     const dispatch = useDispatch();
     const screenY = Dimensions.get("window").height - 220;
-
-    const FOURSQUARE_CLIENT_ID = "1UY5KSLOBVWUMHU3YGC0GFQS2RWUABT3BF53TOLRVGV52DUD";
-    const FOURSQUARE_CLIENT_SECRET = "XTLVZKPAPNV0E2KHUZKMVXVN4PSGPA35CX2MYXJBIHQQ211R";
-    const options = {
-        method: "GET",
-        headers: {
-            accept: "application/json",
-            Authorization: "fsq3HBuWNUPTrY4xfomzu3xGxz2TU3mH4L1l3MKqBhnJk1A=",
-        },
-    };
 
     useEffect(() => {
         Get_Location();
@@ -63,11 +53,11 @@ const Map = (props) => {
                             return (
                                 <ALert
                                     status="error"
-                                    msg="Make sure you enabled location permission for accurate information"
+                                    msg="Make sure you enabled location permission from app settings"
                                 />
                             );
                         },
-                        duration: 2000,
+                        duration: 3000,
                     });
 
                     return;

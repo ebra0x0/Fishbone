@@ -1,4 +1,4 @@
-# G-hearted
+# G-Hearted
 
 ## Restaurant Leftovers App is a mobile application that connects restaurants with users who are want to help stary animals with leftover food.
 

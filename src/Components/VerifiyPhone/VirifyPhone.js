@@ -3,7 +3,6 @@ import { View, Text, Keyboard, TextInput, TouchableOpacity, ActivityIndicator } 
 import auth from "@react-native-firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { isDevice } from "expo-device";
-import { useDispatch, useSelector } from "react-redux";
 import styles from "./styles";
 import ALert from "../Alert/Alert";
 import { Toast } from "native-base";
@@ -68,27 +67,35 @@ const VirifyPhone = (props) => {
                     .catch((e) => {
                         Toast.show({
                             render: () => {
-                                return <ALert status="error" msg="You sent a lot of code, try later!" />;
+                                return <ALert status="error" msg="Verification code failed to sent!" />;
                             },
                             duration: 2000,
                         });
 
                         setLoading(false);
                         console.log(e);
-                        return;
                     });
                 setLoading(false);
-                verification.id && StartTimer();
-                setVerification({
-                    id: confirmation.verificationId,
-                    code: confirmation.code,
-                    number: Pnumber,
-                });
+                if (confirmation) {
+                    verification.id && StartTimer();
+                    setVerification({
+                        id: confirmation.verificationId,
+                        code: confirmation.code,
+                        number: Pnumber,
+                    });
+                }
             } else {
-                <ALert
-                    status="error"
-                    msg="Looks like your using an emulator! please try with a real phone"
-                />;
+                Toast.show({
+                    render: () => {
+                        return (
+                            <ALert
+                                status="error"
+                                msg="Looks like your using an emulator! please try with a real phone"
+                            />
+                        );
+                    },
+                    duration: 5000,
+                });
             }
         } catch (e) {
             setLoading(false);

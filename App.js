@@ -64,7 +64,7 @@ const App = () => {
         });
     }, []);
     useEffect(() => {
-        if (userData && auth().currentUser) {
+        if (userData) {
             setLogged(true);
             setBooting(false);
         } else {
@@ -131,15 +131,14 @@ const App = () => {
 
     const Get_User = async (user) => {
         try {
-            usersRef
-                .doc(user?.uid)
-                .get()
-                .then((querySnapshot) => {
-                    if (querySnapshot?.exists) {
-                        store.dispatch({ type: "userData/Set_User", payload: querySnapshot?.data() });
-                        setUserData(querySnapshot?.data());
-                    }
-                });
+            usersRef.doc(user?.uid).onSnapshot((querySnapshot) => {
+                if (querySnapshot?.exists) {
+                    store.dispatch({ type: "userData/Set_User", payload: querySnapshot?.data() });
+                    setUserData(querySnapshot?.data());
+                } else {
+                    setBooting(false);
+                }
+            });
         } catch (e) {
             console.log(e);
         }

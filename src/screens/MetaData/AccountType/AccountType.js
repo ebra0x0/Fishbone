@@ -37,12 +37,12 @@ const AccountType = ({ route }) => {
     };
 
     useEffect(() => {
-        if (location && verifyedPhone && address && fullName.valid) {
+        if (location && verifyedPhone && address && fullName.valid && data?.photo) {
             setAllDone(true);
         } else {
             setAllDone(false);
         }
-    }, [location, verifyedPhone, address, fullName]);
+    }, [location, verifyedPhone, address, fullName, data?.photo]);
 
     const updateMapState = (location) => {
         location && setLocation(location);
@@ -93,6 +93,7 @@ const AccountType = ({ route }) => {
             location,
             phone: verifyedPhone,
             address: address.value,
+            photo: data?.photo,
         };
 
         setLoading(true);
@@ -102,7 +103,7 @@ const AccountType = ({ route }) => {
             .doc(data?.id)
             .update(MetaData)
             .then(() => {
-                dispatch({ type: "userData/Set_User", payload: { ...MetaData } });
+                dispatch({ type: "userData/Set_User", payload: MetaData });
             })
             .catch((e) => console.log(e));
 
@@ -115,7 +116,7 @@ const AccountType = ({ route }) => {
             <View style={Styles.wrapper}>
                 <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
                     <View style={Styles.avatarCont}>
-                        <Avatar />
+                        <Avatar upload={false} />
                     </View>
                     <View style={{ height: 430 }}>
                         <TouchableOpacity
@@ -127,7 +128,7 @@ const AccountType = ({ route }) => {
                             <Text style={Styles.txt}>
                                 {rest ? CONTENT.acctyperestLocation : CONTENT.acctypeuserLocation}
                             </Text>
-                            <Ionicons name="map" size={25} color={location ? "#0dbc79" : "#919191"} />
+                            <Ionicons name="map" size={25} color={location ? "#0dbc79" : "#b7b7b7"} />
                         </TouchableOpacity>
 
                         <View style={{ justifyContent: "center" }}>
@@ -222,9 +223,7 @@ const AccountType = ({ route }) => {
                 <TouchableOpacity
                     disabled={!allDone}
                     style={[Styles.saveBtn, allDone && Styles.ActiveBtn]}
-                    onPress={() => {
-                        SubmitData();
-                    }}
+                    onPress={SubmitData}
                 >
                     {loading ? (
                         <ActivityIndicator size={30} color="#fff" />
