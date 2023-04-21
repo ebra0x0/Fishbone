@@ -66,7 +66,7 @@ export default ({ navigation }) => {
                     return { ...prev, email: "bad" };
                 });
                 setEmail((prev) => {
-                    return { ...prev, error: "Ahh, That doesn't look like a valid email. Let's try again" };
+                    return { ...prev, error: "Ahh,That doesn't look like a valid email" };
                 });
             }
         } else {
@@ -98,7 +98,7 @@ export default ({ navigation }) => {
                     return { ...prev, pass: "bad", repass: "bad" };
                 });
                 setPassword((prev) => {
-                    return { ...prev, error: "Weak password: make it stronger at least 8 characters" };
+                    return { ...prev, error: "Pretty sure this will be hacked" };
                 });
             }
         } else {
@@ -162,10 +162,6 @@ export default ({ navigation }) => {
         }
     };
 
-    const cropErr = (err) => {
-        const sliceErr = err.split(" ").slice(1, -1).join(" ");
-        return sliceErr;
-    };
     const Register = () => {
         Keyboard.dismiss();
         setLoading(true);
@@ -184,14 +180,14 @@ export default ({ navigation }) => {
                     usersRef
                         .doc(uid)
                         .set(data)
-                        .catch((e) => {
+                        .catch(() => {
                             setLoading(false);
-                            setErrMsg(cropErr(e.message));
+                            setErrMsg("Failed to create account!");
                         });
                 })
-                .catch((e) => {
+                .catch(() => {
                     setLoading(false);
-                    setErrMsg(cropErr(e.message));
+                    setErrMsg("Failed to create account!");
                 });
         } catch (e) {
             setLoading(false);

@@ -5,7 +5,6 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import firestore from "@react-native-firebase/firestore";
 import messaging from "@react-native-firebase/messaging";
 import styles from "./styles";
-import axios from "axios";
 
 import { Discover, Profile, Settings, Notifications } from "../screens";
 
@@ -264,7 +263,7 @@ const Tabs = () => {
                     options={{
                         tabBarIcon: ({ focused }) => (
                             <>
-                                {!data?.photo ? (
+                                {data?.photo ? (
                                     <View
                                         style={[
                                             { width: 30, height: 30, padding: 2, borderRadius: 30 / 2 },

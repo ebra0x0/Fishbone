@@ -106,11 +106,6 @@ export default () => {
             }
         };
 
-        const cropErr = (err) => {
-            const sliceErr = err.split(" ").slice(1, -1).join(" ");
-            return sliceErr;
-        };
-
         const Login = () => {
             try {
                 Keyboard.dismiss();
@@ -132,9 +127,9 @@ export default () => {
                                     return null;
                                 }
                             })
-                            .catch((e) => {
+                            .catch(() => {
                                 setLoading(false);
-                                setErrMsg(cropErr(e.message));
+                                setErrMsg("Failed to login to your account, try again!");
                             });
                     })
                     .catch(() => {

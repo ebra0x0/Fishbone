@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Keyboard } from "react-native";
 import auth from "@react-native-firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import Translations from "../../Languages";
+import { Toast } from "native-base";
+import ALert from "../../Components/Alert/Alert";
 
 const Reset_Pass = ({ navigation }) => {
     const Styles = styles();
     const [email, setEmail] = useState("");
     const [focus, setFocus] = useState(false);
     const [done, setDone] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const CONTENT = {
         resetpassTitle: Translations().t("resetpassTitle"),
@@ -34,6 +37,8 @@ const Reset_Pass = ({ navigation }) => {
         const regexE = new RegExp("[a-zA-Z0-9]+@+(gmail|outlook|iCloud|yahoo|hotmail).com");
         if (email.match(regexE)) {
             try {
+                Keyboard.dismiss();
+                setLoading(true);
                 auth()
                     .sendPasswordResetEmail(email)
                     .then(() => {
@@ -41,14 +46,18 @@ const Reset_Pass = ({ navigation }) => {
                             render: () => {
                                 return <ALert status="success" msg="Check your email to reset password." />;
                             },
-                            duration: 2000,
+                            duration: 3000,
                         });
 
                         navigation.goBack();
                     })
-                    .catch((e) => console.log(e));
+                    .catch((e) => {
+                        setLoading(false);
+                        console.log(e);
+                    });
             } catch (e) {
                 console.log(e);
+                setLoading(false);
             }
         } else {
             Toast.show({
@@ -57,6 +66,7 @@ const Reset_Pass = ({ navigation }) => {
                 },
                 duration: 2000,
             });
+            setLoading(false);
         }
     };
 
@@ -94,8 +104,16 @@ const Reset_Pass = ({ navigation }) => {
                         setFocus(false);
                     }}
                 />
-                <TouchableOpacity style={[Styles.sendBtn, done && { opacity: 1 }]} onPress={Send_Email}>
-                    <Text style={{ color: "#fff", fontSize: 16 }}>{CONTENT.resetpassSend}</Text>
+                <TouchableOpacity
+                    style={[Styles.sendBtn, done && { opacity: 1 }]}
+                    onPress={Send_Email}
+                    disabled={loading || !done}
+                >
+                    {loading ? (
+                        <ActivityIndicator size={25} color="#fff" />
+                    ) : (
+                        <Text style={{ color: "#fff", fontSize: 16 }}>{CONTENT.resetpassSend}</Text>
+                    )}
                 </TouchableOpacity>
             </View>
         </View>

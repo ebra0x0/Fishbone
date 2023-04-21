@@ -222,27 +222,60 @@ const OpenProfile = ({ navigation, route }) => {
                         <View
                             style={{
                                 flexDirection: "row",
-                                justifyContent: "space-between",
+                                alignItems: "center",
                                 paddingHorizontal: 70,
-                                height: 70,
+                                height: 30,
                             }}
                         >
-                            <TouchableOpacity onPress={() => Open_Social("fb")}>
-                                <Ionicons name="logo-facebook" size={25} color={theme ? "#fff" : "#3e3e3e"} />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => Open_Social("tw")}>
-                                <Ionicons name="logo-twitter" size={25} color={theme ? "#fff" : "#3e3e3e"} />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => Open_Social("inst")}>
-                                <Ionicons
-                                    name="logo-instagram"
-                                    size={25}
-                                    color={theme ? "#fff" : "#3e3e3e"}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => Open_Social("web")}>
-                                <Ionicons name="globe-outline" size={25} color={theme ? "#fff" : "#3e3e3e"} />
-                            </TouchableOpacity>
+                            {Data?.social.fb && (
+                                <TouchableOpacity
+                                    style={{ flex: 1, alignItems: "center" }}
+                                    onPress={() => Open_Social("fb")}
+                                >
+                                    <Ionicons
+                                        name="logo-facebook"
+                                        size={25}
+                                        color={theme ? "#fff" : "#3e3e3e"}
+                                    />
+                                </TouchableOpacity>
+                            )}
+                            {Data?.social.tw && (
+                                <TouchableOpacity
+                                    style={{ flex: 1, alignItems: "center" }}
+                                    onPress={() => Open_Social("tw")}
+                                >
+                                    <Ionicons
+                                        name="logo-twitter"
+                                        size={25}
+                                        color={theme ? "#fff" : "#3e3e3e"}
+                                    />
+                                </TouchableOpacity>
+                            )}
+                            {Data?.social.inst && (
+                                <TouchableOpacity
+                                    style={{ flex: 1, alignItems: "center" }}
+                                    onPress={() => Open_Social("inst")}
+                                >
+                                    <Ionicons
+                                        name="logo-instagram"
+                                        size={25}
+                                        color={theme ? "#fff" : "#3e3e3e"}
+                                    />
+                                </TouchableOpacity>
+                            )}
+
+                            {Data?.social.web && (
+                                <TouchableOpacity
+                                    style={{ flex: 1, alignItems: "center" }}
+                                    onPress={() => Open_Social("web")}
+                                >
+                                    <Ionicons
+                                        name="globe-outline"
+                                        size={25}
+                                        color={theme ? "#fff" : "#3e3e3e"}
+                                    />
+                                </TouchableOpacity>
+                            )}
                         </View>
                     )}
                 </View>

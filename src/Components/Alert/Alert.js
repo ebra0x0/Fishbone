@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Image, Keyboard, Text } from "react-native";
-import { HStack, Box, Center } from "native-base";
+import { HStack, Center } from "native-base";
 import RootColor from "../../RootColor";
 
 const ALert = (props) => {

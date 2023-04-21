@@ -22,6 +22,7 @@ const styles = () => {
             marginTop: 5,
             fontSize: 20,
             color: "#fff",
+            marginLeft: 4,
         },
         formContainer: {
             paddingTop: 30,

@@ -20,7 +20,7 @@ import Avatar from "../../Components/Avatar/Avatar";
 import { useEffect } from "react";
 import Translations from "../../Languages";
 import ALert from "../../Components/Alert/Alert";
-import { useToast } from "native-base";
+import { Toast } from "native-base";
 
 export default () => {
     const Styles = styles();
@@ -39,7 +39,6 @@ export default () => {
     const [loading, setLoading] = useState(false);
 
     const dispatch = useDispatch();
-    const Toast = useToast();
 
     const usersRef = firestore().collection("users").doc(data?.id);
 
@@ -52,12 +51,16 @@ export default () => {
     };
 
     useEffect(() => {
-        if (address.length > 10 && address.trim() !== data?.address) {
+        CheckValidation(address);
+    }, [address]);
+
+    const CheckValidation = (add) => {
+        if (add.length > 10 && add.trim() !== data?.address) {
             setAllDone(true);
         } else {
             setAllDone(false);
         }
-    }, [address]);
+    };
 
     const updateProfile = async () => {
         if (allDone) {
@@ -109,8 +112,7 @@ export default () => {
                     )}
 
                     <Avatar upload={true} />
-
-                    <Text style={Styles.titleName}>{data?.Name || "User Name"}</Text>
+                    <Text style={Styles.titleName}>{data?.Name}</Text>
                 </View>
 
                 <KeyboardAwareScrollView style={Styles.formContainer} keyboardShouldPersistTaps="handled">

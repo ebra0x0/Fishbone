@@ -19,7 +19,8 @@ import firestore from "@react-native-firebase/firestore";
 import messaging from "@react-native-firebase/messaging";
 import { decode, encode } from "base-64";
 import { createStackNavigator } from "@react-navigation/stack";
-import { NativeBaseProvider } from "native-base";
+import { NativeBaseProvider, Toast } from "native-base";
+import ALert from "./src/Components/Alert/Alert";
 
 if (!global.btoa) {
     global.btoa = encode;
@@ -53,9 +54,20 @@ const App = () => {
         Notifications_Handelr();
         Notifications_Listeners();
 
+        auth()
+            .currentUser?.reload()
+            .catch(() => {
+                Toast.show({
+                    render: () => {
+                        return <ALert status="error" msg="Your account has been deleted!" />;
+                    },
+                    duration: 2000,
+                });
+            });
+
         auth().onAuthStateChanged(async (session) => {
             if (session) {
-                await Get_User(session);
+                Get_User(session);
             } else {
                 setUserData(null);
                 store.dispatch({ type: "userData/Del_User" });
