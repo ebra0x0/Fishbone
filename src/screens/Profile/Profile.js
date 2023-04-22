@@ -62,7 +62,7 @@ export default () => {
         }
     };
 
-    const updateProfile = async () => {
+    const updateProfile = async (address) => {
         if (allDone) {
             Keyboard.dismiss();
             setLoading(true);
@@ -214,7 +214,7 @@ export default () => {
                             <TouchableOpacity
                                 style={[Styles.button, allDone && { opacity: 1 }]}
                                 disabled={!allDone || loading}
-                                onPress={updateProfile}
+                                onPress={() => updateProfile(address)}
                             >
                                 {loading ? (
                                     <ActivityIndicator size={30} color="#fff" />

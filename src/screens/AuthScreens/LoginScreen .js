@@ -106,13 +106,13 @@ export default () => {
             }
         };
 
-        const Login = () => {
+        const Login = (email, pass) => {
             try {
                 Keyboard.dismiss();
                 setLoading(true);
 
                 auth()
-                    .signInWithEmailAndPassword(email.value, password.value)
+                    .signInWithEmailAndPassword(email, pass)
                     .then((response) => {
                         const uid = response.user.uid;
                         const usersRef = firestore().collection("users");
@@ -241,7 +241,7 @@ export default () => {
 
                     <TouchableOpacity
                         style={[Styles.loginBtn, (actvBtn || loading) && { opacity: 1 }]}
-                        onPress={Login}
+                        onPress={() => Login(email.value, password.value)}
                         disabled={!actvBtn || loading}
                     >
                         <Text style={Styles.loginBtnTitle}>

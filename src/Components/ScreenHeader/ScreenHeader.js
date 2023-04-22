@@ -26,7 +26,6 @@ const ScreenHeader = (props) => {
                 paddingTop: 30,
                 flexDirection: "row",
                 alignItems: "center",
-                zIndex: 99,
             }}
         >
             {arrow && (

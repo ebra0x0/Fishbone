@@ -587,7 +587,7 @@ export default () => {
         const HeaderButtons = Buttons.map((btn) => {
             if (btn.show) {
                 return (
-                    <TouchableOpacity style={{ marginLeft: 15 }} key={btn.key} onPress={() => btn.fun()}>
+                    <TouchableOpacity style={{ marginLeft: 15 }} key={btn.key} onPress={btn.fun}>
                         <Ionicons name={btn.name} size={btn.size} color={btn.color} />
                     </TouchableOpacity>
                 );
@@ -835,17 +835,18 @@ export default () => {
                         refreshControl={
                             <RefreshControl
                                 colors={["#1785f5"]}
-                                progressBackgroundColor={theme ? "#001837" : "#ffffff"}
-                                progressViewOffset={30}
+                                progressBackgroundColor={theme ? "#001c40" : "#ffffff"}
+                                progressViewOffset={25}
                                 refreshing={refreshing}
                                 onRefresh={onRefresh}
                             />
                         }
-                        contentContainerStyle={
+                        contentContainerStyle={[
+                            { paddingBottom: 30 },
                             !POSTS.length
                                 ? { flex: 1, justifyContent: "center", alignItems: "center" }
-                                : false
-                        }
+                                : false,
+                        ]}
                     >
                         {POSTS.length ? (
                             <>
@@ -936,6 +937,7 @@ export default () => {
                                     <>
                                         <Text style={Styles.postsHeader}>{CONTENT.flheaderFav}</Text>
                                         <FlatList
+                                            style={Styles.flatList}
                                             data={favPosts}
                                             renderItem={renderPost}
                                             keyExtractor={(item) => item.key}

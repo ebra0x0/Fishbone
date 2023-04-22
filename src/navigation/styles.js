@@ -12,7 +12,7 @@ const styles = () => {
             paddingBottom: 10,
             bottom: 0,
             borderTopWidth: 0,
-            backgroundColor: "transparent",
+            backgroundColor: "#00102380",
             alignItems: "center",
             elevation: 0,
         },

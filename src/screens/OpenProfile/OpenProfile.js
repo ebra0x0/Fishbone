@@ -87,6 +87,12 @@ const OpenProfile = ({ navigation, route }) => {
                 break;
         }
     };
+    const openPhoneApp = (phone) => {
+        Linking.openURL(`tel:${phone}`);
+    };
+    const openMailApp = (email) => {
+        Linking.openURL(`mailto:${email}`);
+    };
 
     const HeaderTitle = (
         <Text
@@ -145,7 +151,7 @@ const OpenProfile = ({ navigation, route }) => {
                 </View>
 
                 <View style={Styles.wrapper}>
-                    <View style={Styles.row}>
+                    <TouchableOpacity style={Styles.row} onPress={() => GetDirections(Data?.id)}>
                         <Ionicons
                             style={Styles.label}
                             name="compass-outline"
@@ -155,8 +161,8 @@ const OpenProfile = ({ navigation, route }) => {
                         <Text style={Styles.txtRows} selectable={true}>
                             {Data.address}
                         </Text>
-                    </View>
-                    <View style={Styles.row}>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={Styles.row} onPress={() => openPhoneApp(Data?.phone)}>
                         <Ionicons
                             style={Styles.label}
                             name="call-outline"
@@ -166,9 +172,9 @@ const OpenProfile = ({ navigation, route }) => {
                         <Text style={Styles.txtRows} selectable={true}>
                             {Data.phone}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
-                    <View style={Styles.row}>
+                    <TouchableOpacity style={Styles.row} onPress={() => openMailApp(Data?.email)}>
                         <Ionicons
                             style={Styles.label}
                             name="mail-outline"
@@ -178,7 +184,7 @@ const OpenProfile = ({ navigation, route }) => {
                         <Text style={Styles.txtRows} selectable={true}>
                             {Data.email}
                         </Text>
-                    </View>
+                    </TouchableOpacity>
 
                     <View
                         style={{

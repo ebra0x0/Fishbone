@@ -20,6 +20,8 @@ const VirifyPhone = (props) => {
     const [userVCode, setUserVCode] = useState("");
     const [loading, setLoading] = useState({ send: false, virify: false });
 
+    const { updatePhone, disabled } = props;
+
     const [timer, setTimer] = useState({ started: false, value: 60 });
     const intervalRef = useRef();
 
@@ -33,7 +35,7 @@ const VirifyPhone = (props) => {
 
     useEffect(() => {
         if (Phone.verified) {
-            props.updatePhone(Phone.value);
+            updatePhone(Phone.value);
         }
     }, [Phone]);
     useEffect(() => {
@@ -155,7 +157,7 @@ const VirifyPhone = (props) => {
                         placeholderTextColor="#7a7a7a"
                         keyboardType="phone-pad"
                         maxLength={11}
-                        editable={Phone.verified ? false : true}
+                        editable={Phone.verified ? !disabled : true}
                         onChangeText={(value) => {
                             setPhone((prev) => {
                                 return { ...prev, value: value };
@@ -173,7 +175,15 @@ const VirifyPhone = (props) => {
                                 Styles.CodeBtn,
                                 Phone.valid && !timer.started && { backgroundColor: "#1785f5" },
                             ]}
-                            disabled={Phone.valid ? (timer.started ? true : loading.send) : true}
+                            disabled={
+                                !disabled
+                                    ? Phone.valid
+                                        ? timer.started
+                                            ? true
+                                            : loading.send
+                                        : true
+                                    : true
+                            }
                             onPress={() => sendVerificationCode(Phone.value)}
                         >
                             {loading.send ? (
@@ -210,12 +220,13 @@ const VirifyPhone = (props) => {
                             placeholder={CONTENT.acctypeCode}
                             placeholderTextColor="#7a7a7a"
                             maxLength={10}
+                            editable={!disabled}
                             textAlign="left"
                             value={userVCode}
                             onChangeText={(code) => setUserVCode(code)}
                         />
                         <TouchableOpacity
-                            disabled={userVCode ? loading.virify : true}
+                            disabled={!disabled ? (userVCode ? loading.virify : true) : true}
                             style={[Styles.CodeBtn, userVCode && { backgroundColor: "#1785f5" }]}
                             onPress={() => verifyVerificationCode()}
                         >

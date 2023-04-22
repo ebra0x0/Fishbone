@@ -144,7 +144,7 @@ const CreatePost = ({ navigation }) => {
         });
     };
 
-    const Publish = async () => {
+    const Publish = async (foodType, postDesc, closedTime, image) => {
         if (done) {
             try {
                 setLoading(true);
@@ -241,7 +241,7 @@ const CreatePost = ({ navigation }) => {
                     <Text style={{ color: theme ? "#0059c5" : "#7a7a7a", marginBottom: 10 }}>
                         {CONTENT.postfoodImg}
                     </Text>
-                    <TouchableOpacity style={Styles.pickImageBtn} onPress={pickImage}>
+                    <TouchableOpacity style={Styles.pickImageBtn} onPress={pickImage} disabled={loading}>
                         {image ? (
                             <Image style={{ width: "100%", height: "100%" }} source={{ uri: image }} />
                         ) : (
@@ -258,6 +258,7 @@ const CreatePost = ({ navigation }) => {
                         style={Styles.input}
                         value={foodType}
                         maxLength={30}
+                        editable={!loading}
                         placeholder={CONTENT.postTypeFood}
                         placeholderTextColor="#7a7a7a"
                         onChangeText={(txt) => setFoodType(txt)}
@@ -266,12 +267,17 @@ const CreatePost = ({ navigation }) => {
                         style={Styles.input}
                         value={postDesc}
                         maxLength={100}
+                        editable={!loading}
                         placeholder={CONTENT.postFoodContains}
                         placeholderTextColor="#7a7a7a"
                         onChangeText={(txt) => setPostDesc(txt)}
                     />
 
-                    <Button colorScheme={closedTime.valid ? "emerald" : "gray"} onPress={showMode}>
+                    <Button
+                        colorScheme={closedTime.valid ? "emerald" : "gray"}
+                        onPress={showMode}
+                        disabled={loading}
+                    >
                         <HStack alignItems={"center"}>
                             <Ionicons name="time-outline" size={25} color="#fff" />
                             <Text style={{ color: "#fff", fontSize: 16, marginLeft: 4 }}>
@@ -279,11 +285,12 @@ const CreatePost = ({ navigation }) => {
                             </Text>
                         </HStack>
                     </Button>
+
                     <View style={Styles.saveBtnCont}>
                         <TouchableOpacity
                             disabled={loading || !done}
                             style={[Styles.saveBtn, done && Styles.ActiveBtn]}
-                            onPress={Publish}
+                            onPress={() => Publish(foodType, postDesc, closedTime, image)}
                         >
                             {loading ? (
                                 <ActivityIndicator size={30} color="#fff" />

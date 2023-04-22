@@ -33,7 +33,7 @@ const Reset_Pass = ({ navigation }) => {
 
         return regexE.test(email);
     };
-    const Send_Email = () => {
+    const Send_Resetpass = (email) => {
         const regexE = new RegExp("[a-zA-Z0-9]+@+(gmail|outlook|iCloud|yahoo|hotmail).com");
         if (email.match(regexE)) {
             try {
@@ -106,7 +106,7 @@ const Reset_Pass = ({ navigation }) => {
                 />
                 <TouchableOpacity
                     style={[Styles.sendBtn, done && { opacity: 1 }]}
-                    onPress={Send_Email}
+                    onPress={() => Send_Resetpass(email)}
                     disabled={loading || !done}
                 >
                     {loading ? (

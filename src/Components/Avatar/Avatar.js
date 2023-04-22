@@ -12,7 +12,7 @@ const Avatar = (props) => {
     const { data } = useSelector((state) => state.user);
     const [image, setImage] = useState(data?.photo);
 
-    const { upload } = props;
+    const { upload, disabled } = props;
 
     const dispatch = useDispatch();
 
@@ -53,7 +53,7 @@ const Avatar = (props) => {
     };
 
     return (
-        <TouchableOpacity onPress={() => pickImage()} touchSoundDisabled>
+        <TouchableOpacity onPress={pickImage} touchSoundDisabled disabled={disabled}>
             <View style={Styles.Avatar}>
                 {image ? (
                     <Image

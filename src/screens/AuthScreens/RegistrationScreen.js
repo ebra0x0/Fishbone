@@ -162,19 +162,19 @@ export default ({ navigation }) => {
         }
     };
 
-    const Register = () => {
+    const Register = (email, pass) => {
         Keyboard.dismiss();
         setLoading(true);
 
         try {
             auth()
-                .createUserWithEmailAndPassword(email.value, password.value)
+                .createUserWithEmailAndPassword(email, pass)
                 .then((response) => {
                     const uid = response.user.uid;
                     const data = {
                         id: uid,
                         photo: "",
-                        email: email.value,
+                        email: email,
                         verified: false,
                     };
                     usersRef
@@ -339,7 +339,7 @@ export default ({ navigation }) => {
                 {rePass.error && <Text style={{ color: "#ff4a4a", fontSize: 12 }}>{rePass.error}</Text>}
                 <TouchableOpacity
                     style={[Styles.loginBtn, (actvBtn || loading) && { opacity: 1 }]}
-                    onPress={Register}
+                    onPress={() => Register(email.value, password.value)}
                     disabled={!actvBtn || loading}
                 >
                     <Text style={Styles.loginBtnTitle}>

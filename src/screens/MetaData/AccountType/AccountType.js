@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, TextInput } from "react-native";
+import { View, TouchableOpacity, Text, TextInput, ActivityIndicator } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useDispatch, useSelector } from "react-redux";
 import firestore from "@react-native-firebase/firestore";
@@ -18,7 +18,7 @@ const AccountType = ({ route }) => {
     const [location, setLocation] = useState(null);
     const [fullName, setFullName] = useState({ value: "", valid: null, err: "" });
     const [address, setAddress] = useState({ value: "", valid: null, err: "" });
-    const [verifyedPhone, setVerifyedPhone] = useState("");
+    const [verifyedPhone, setVerifyedPhone] = useState("01205262745");
     const [allDone, setAllDone] = useState(false);
 
     const { rest } = route.params;
@@ -84,15 +84,15 @@ const AccountType = ({ route }) => {
         }
     };
 
-    const SubmitData = async () => {
+    const SubmitData = async (location, fullName, address, verifyedPhone) => {
         const MetaData = {
             verified: true,
-            Name: fullName.value,
-            userName: fullName.value.toLowerCase(),
+            Name: fullName,
+            userName: fullName.toLowerCase(),
             restaurant: rest,
             location,
             phone: verifyedPhone,
-            address: address.value,
+            address: address,
             photo: data?.photo,
         };
 
@@ -116,7 +116,7 @@ const AccountType = ({ route }) => {
             <View style={Styles.wrapper}>
                 <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
                     <View style={Styles.avatarCont}>
-                        <Avatar upload={false} />
+                        <Avatar upload={false} disabled={loading} />
                     </View>
                     <View style={{ height: 430 }}>
                         <TouchableOpacity
@@ -124,6 +124,7 @@ const AccountType = ({ route }) => {
                             onPress={() => {
                                 setMapState(true);
                             }}
+                            disabled={loading}
                         >
                             <Text style={Styles.txt}>
                                 {rest ? CONTENT.acctyperestLocation : CONTENT.acctypeuserLocation}
@@ -137,6 +138,7 @@ const AccountType = ({ route }) => {
                                 placeholder={CONTENT.acctypeName}
                                 placeholderTextColor="#7a7a7a"
                                 maxLength={20}
+                                editable={!loading}
                                 value={fullName.value}
                                 onChangeText={(text) => {
                                     setFullName((prev) => {
@@ -180,6 +182,7 @@ const AccountType = ({ route }) => {
                                 placeholder={rest ? CONTENT.acctyperestAddress : CONTENT.acctypeuserAddress}
                                 placeholderTextColor="#7a7a7a"
                                 maxLength={60}
+                                editable={!loading}
                                 onChangeText={(txt) => {
                                     setAddress((prev) => {
                                         return { ...prev, value: txt };
@@ -215,7 +218,7 @@ const AccountType = ({ route }) => {
                         </View>
                         {address.err && <Text style={Styles.err}>{address.err}</Text>}
 
-                        <VirifyPhone updatePhone={setVerifyedPhone} />
+                        <VirifyPhone updatePhone={setVerifyedPhone} disabled={loading} />
                     </View>
                 </KeyboardAwareScrollView>
             </View>
@@ -223,7 +226,7 @@ const AccountType = ({ route }) => {
                 <TouchableOpacity
                     disabled={!allDone}
                     style={[Styles.saveBtn, allDone && Styles.ActiveBtn]}
-                    onPress={SubmitData}
+                    onPress={() => SubmitData(location, fullName.value, address.value, verifyedPhone)}
                 >
                     {loading ? (
                         <ActivityIndicator size={30} color="#fff" />

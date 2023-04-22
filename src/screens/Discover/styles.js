@@ -1,16 +1,13 @@
 import { StyleSheet } from "react-native";
 import RootColor from "../../RootColor";
-import { useSelector } from "react-redux";
 
 const styles = () => {
-    const { lang } = useSelector((state) => state.user);
     const Root = RootColor();
 
     return StyleSheet.create({
         Container: {
             flex: 1,
             backgroundColor: Root.CONTAINER,
-            paddingBottom: 50,
         },
         scrollView: {
             paddingHorizontal: 10,
@@ -21,7 +18,7 @@ const styles = () => {
         },
         postsHeader: {
             textAlign: "left",
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: "bold",
             color: Root.VIEW_TXT,
             marginBottom: 7,
