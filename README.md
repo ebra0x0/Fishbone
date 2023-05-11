@@ -1,6 +1,6 @@
 # G-Hearted
 
-Restaurant Leftovers App is a mobile application that connects restaurants with users who are want to help stary animals with leftover food.
+Restaurant Leftovers App is a mobile application that connects restaurants with users who are want to help stray animals with leftover food.
 
 ## Table of Content
 
@@ -38,8 +38,6 @@ Favorites screen
 -   Beautiful and Modern design using Native base
 
 -   Switch between Dark mode and light mode
-
--   Sign-In & Sign-Up Pages.
 
 -   Contains restaurant interface and user interface.
 
