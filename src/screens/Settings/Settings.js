@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View, Animated } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./styles";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
@@ -24,21 +24,7 @@ export default () => {
         settLightTheme: Translations().t("settLightTheme"),
         settDarkTheme: Translations().t("settDarkTheme"),
     };
-    const HeaderTitle = (
-        <Text
-            style={{
-                textAlign: "left",
-                flex: 1,
-                marginLeft: 6,
-                fontSize: 30,
-                color: theme ? "#fff" : "#252525",
-                fontWeight: "bold",
-            }}
-        >
-            {Translations().t("settTitle")}
-        </Text>
-    );
-
+    const HeaderTitle = Translations().t("settTitle");
     return (
         <View style={Styles.container}>
             <ScreenHeader title={HeaderTitle} />
@@ -66,7 +52,7 @@ export default () => {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={[Styles.toggleBtn, { backgroundColor: theme ? "#1e1e1e" : "#fff" }]}
+                        style={[Styles.toggleBtn, { backgroundColor: theme ? "#001837" : "#fff" }]}
                         onPress={langToggle}
                     >
                         <Text style={{ color: theme ? "#fff" : "#000", fontWeight: "bold" }}>
@@ -75,6 +61,7 @@ export default () => {
                     </TouchableOpacity>
                 </View>
             </View>
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}></View>
         </View>
     );
 };

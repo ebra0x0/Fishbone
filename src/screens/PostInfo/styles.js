@@ -1,9 +1,7 @@
 import { StyleSheet } from "react-native";
-import { useSelector } from "react-redux";
 import RootColor from "../../RootColor";
 
 const styles = () => {
-    const { theme } = useSelector((state) => state.user);
     const Root = RootColor();
 
     return StyleSheet.create({
@@ -16,7 +14,7 @@ const styles = () => {
             position: "absolute",
             width: 40,
             height: 40,
-            top: 30,
+            top: 40,
             left: 20,
             borderRadius: 40 / 2,
             justifyContent: "center",
@@ -39,7 +37,7 @@ const styles = () => {
         },
         wrapper: {
             flex: 1,
-            paddingLeft: 15,
+            paddingHorizontal: 15,
         },
         postData: {
             flexDirection: "column",
@@ -52,6 +50,11 @@ const styles = () => {
         row: {
             flexDirection: "row",
             alignItems: "center",
+        },
+        expDate: {
+            color: Root.VIEW_TXT,
+            marginVertical: 5,
+            paddingHorizontal: 3,
         },
         postContent: {
             marginTop: 60,

@@ -1,6 +1,6 @@
 node_modules/
-google-services.json
 Eas.confige.txt
+google-services.json
 eas.json
 yarn.lock
 .expo/

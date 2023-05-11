@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import firestore from "@react-native-firebase/firestore";
 import storage from "@react-native-firebase/storage";
 
-const OpenCamera = ({ navigation }) => {
+const OpenCamera = (props) => {
     const Styles = styles();
     const { data, hasUnconfirmedOrder } = useSelector((state) => state.user);
     const [type, setType] = useState(CameraType.back);
@@ -56,7 +56,7 @@ const OpenCamera = ({ navigation }) => {
     };
     const Open_Settings = () => {
         Linking.openSettings();
-        navigation.goBack();
+        props.openCamera(false);
     };
     const ReAsk_Button = () => {
         return (

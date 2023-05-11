@@ -4,7 +4,7 @@ import auth from "@react-native-firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { isDevice } from "expo-device";
 import styles from "./styles";
-import ALert from "../Alert/Alert";
+import TOAST from "../Toast/Toast";
 import { Toast } from "native-base";
 import Translations from "../../Languages";
 
@@ -69,28 +69,37 @@ const VirifyPhone = (props) => {
                     .catch((e) => {
                         Toast.show({
                             render: () => {
-                                return <ALert status="error" msg="Verification code failed to sent!" />;
+                                return <TOAST status="error" msg="Verification code failed to sent!" />;
                             },
-                            duration: 2000,
+                            duration: 3000,
                         });
 
                         setLoading(false);
                         console.log(e);
                     });
                 setLoading(false);
-                if (confirmation) {
+                if (confirmation.verificationId && confirmation.code) {
                     verification.id && StartTimer();
                     setVerification({
                         id: confirmation.verificationId,
                         code: confirmation.code,
                         number: Pnumber,
                     });
+                } else {
+                    Toast.show({
+                        render: () => {
+                            return <TOAST status="error" msg="Verification code failed to sent!" />;
+                        },
+                        duration: 3000,
+                    });
+
+                    setLoading(false);
                 }
             } else {
                 Toast.show({
                     render: () => {
                         return (
-                            <ALert
+                            <TOAST
                                 status="error"
                                 msg="Looks like your using an emulator! please try with a real phone"
                             />

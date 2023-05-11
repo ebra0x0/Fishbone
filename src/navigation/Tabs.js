@@ -1,12 +1,15 @@
-import React, { useRef, useState, useEffect } from "react";
-import { ActivityIndicator, Animated, Dimensions, Image, Keyboard, View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ActivityIndicator, Dimensions, Image, Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import firestore from "@react-native-firebase/firestore";
 import messaging from "@react-native-firebase/messaging";
 import styles from "./styles";
 
-import { Discover, Profile, Settings, Notifications } from "../screens";
+import { Profile, Settings, Notifications } from "../screens";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import Dashboard from "../screens/Dashboard/Dashboard";
+import Explore from "../screens/Explore/Explore";
 
 const Tab = createBottomTabNavigator();
 
@@ -18,8 +21,17 @@ const Tabs = () => {
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
     const $Orders_Ref = firestore().collection("users").doc(data?.id).collection("orders");
-    const _AntMove = useRef(new Animated.Value(0)).current;
-    const ANT_BAR = { x: 10, y: 3 };
+    const _AntMove = useSharedValue(0);
+    const _AntWidth = useSharedValue(5);
+    const _AntHeight = useSharedValue(5);
+    const AnimStyle = useAnimatedStyle(() => {
+        return {
+            width: _AntWidth.value,
+            height: _AntHeight.value,
+            borderRadius: _AntWidth.value / 2,
+            transform: [{ translateX: _AntMove.value }],
+        };
+    });
 
     const icons = {
         discover: {
@@ -45,10 +57,8 @@ const Tabs = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        Animated.spring(_AntMove, {
-            toValue: TAB_BAR_WIDTH(),
-            useNativeDriver: true,
-        }).start();
+        AnimateTo(TAB_BAR_WIDTH());
+
         Upload_Token(data?.id);
         Topic_Subscribtion(data?.restaurant ? "rests" : "users");
         if (!data?.restaurant) {
@@ -61,6 +71,20 @@ const Tabs = () => {
 
         KeyboardHandler();
     }, []);
+
+    const AnimateTo = (value) => {
+        _AntWidth.value = withTiming(25, { duration: 100 }, (end) => {
+            if (end) {
+                _AntWidth.value = withTiming(5);
+            }
+        });
+        _AntHeight.value = withTiming(3, { duration: 100 }, (end) => {
+            if (end) {
+                _AntHeight.value = withTiming(5);
+            }
+        });
+        _AntMove.value = withSpring(value, { mass: 0.5, damping: 10 });
+    };
 
     const KeyboardHandler = () => {
         const keyboardOpenListener = Keyboard.addListener("keyboardDidShow", () => setIsKeyboardOpen(true));
@@ -80,30 +104,22 @@ const Tabs = () => {
     };
 
     const Get_Notifications = async () => {
-        let Count = 0;
-
         $Orders_Ref.onSnapshot((querySnapshot) => {
             if (querySnapshot?.size) {
-                querySnapshot.forEach((order) => {
-                    const { seened, delievered, accepted } = order.data();
+                const newOrders = querySnapshot.docs.filter((order) => !order.data()?.seened);
 
-                    if (!data?.restaurant && !seened && accepted !== undefined) {
-                        Count++;
-                    }
-                    if (data?.restaurant && (!seened || delievered === undefined || accepted === undefined)) {
-                        Count++;
-                    }
-                });
-                setMsgsCount(Count);
+                setMsgsCount(newOrders.length);
             }
         });
     };
 
     const Check_Unconfirmed_Orders = async () => {
         try {
-            await $Orders_Ref.get().then((querySnapshot) => {
-                if (querySnapshot.size) {
-                    querySnapshot.forEach((order, indx) => {
+            let done = true;
+            $Orders_Ref.onSnapshot((querySnapshot) => {
+                if (querySnapshot?.size) {
+                    querySnapshot.forEach((order) => {
+                        done = false;
                         const { delievered, confirmed } = order.data();
 
                         if (delievered && !confirmed) {
@@ -118,8 +134,7 @@ const Tabs = () => {
                     setConfPhoto(false);
                 }
             });
-
-            confPhoto == null && setConfPhoto(false);
+            done && confPhoto === null && setConfPhoto(false);
         } catch (e) {
             console.log(e);
             setConfPhoto(false);
@@ -162,7 +177,7 @@ const Tabs = () => {
                                     key: doc.id,
                                 });
                             });
-                        if (indx + 1 == querySnapshot.size) {
+                        if (indx + 1 == querySnapshot?.size) {
                             dispatch({ type: "userData/Set_Favorites", payload: newFavs });
                         }
                     });
@@ -189,7 +204,7 @@ const Tabs = () => {
             >
                 <Tab.Screen
                     name="HomeTab"
-                    component={Discover}
+                    component={data?.restaurant ? Dashboard : Explore}
                     options={{
                         tabBarIcon: ({ focused }) => (
                             <Image
@@ -200,10 +215,7 @@ const Tabs = () => {
                     }}
                     listeners={() => ({
                         focus: () => {
-                            Animated.spring(_AntMove, {
-                                toValue: TAB_BAR_WIDTH(),
-                                useNativeDriver: true,
-                            }).start();
+                            AnimateTo(TAB_BAR_WIDTH());
                         },
                     })}
                 ></Tab.Screen>
@@ -227,11 +239,11 @@ const Tabs = () => {
                         tabBarBadgeStyle: Styles.Badge,
                     }}
                     listeners={() => ({
+                        tabPress: () => {
+                            setMsgsCount(0);
+                        },
                         focus: () => {
-                            Animated.spring(_AntMove, {
-                                toValue: TAB_BAR_WIDTH() * 2,
-                                useNativeDriver: true,
-                            }).start();
+                            AnimateTo(TAB_BAR_WIDTH() * 2);
                             setMsgsCount(0);
                         },
                     })}
@@ -250,10 +262,7 @@ const Tabs = () => {
                     }}
                     listeners={() => ({
                         focus: () => {
-                            Animated.spring(_AntMove, {
-                                toValue: TAB_BAR_WIDTH() * 3,
-                                useNativeDriver: true,
-                            }).start();
+                            AnimateTo(TAB_BAR_WIDTH() * 3);
                         },
                     })}
                 />
@@ -264,22 +273,16 @@ const Tabs = () => {
                         tabBarIcon: ({ focused }) => (
                             <>
                                 {data?.photo ? (
-                                    <View
-                                        style={[
-                                            { width: 30, height: 30, padding: 2, borderRadius: 30 / 2 },
-                                            focused && { backgroundColor: "#bdbdbd" },
-                                        ]}
-                                    >
-                                        <Image
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                borderRadius: 30 / 2,
-                                                opacity: focused ? 1 : 0.7,
-                                            }}
-                                            source={{ uri: data?.photo }}
-                                        />
-                                    </View>
+                                    <Image
+                                        style={{
+                                            width: 23,
+                                            height: 23,
+                                            borderRadius: 23 / 2,
+                                            opacity: focused ? 1 : 0.7,
+                                            backgroundColor: "#001837",
+                                        }}
+                                        source={{ uri: data?.photo }}
+                                    />
                                 ) : (
                                     <Image
                                         style={{ width: 23, height: 23 }}
@@ -291,10 +294,7 @@ const Tabs = () => {
                     }}
                     listeners={() => ({
                         focus: () => {
-                            Animated.spring(_AntMove, {
-                                toValue: TAB_BAR_WIDTH() * 4,
-                                useNativeDriver: true,
-                            }).start();
+                            AnimateTo(TAB_BAR_WIDTH() * 4);
                         },
                     })}
                 />
@@ -302,17 +302,16 @@ const Tabs = () => {
 
             {!isKeyboardOpen && (
                 <Animated.View
-                    style={{
-                        width: ANT_BAR.x,
-                        height: ANT_BAR.y,
-                        backgroundColor: Styles.activeTabs,
-                        position: "absolute",
-                        bottom: 10,
-                        left: 7,
-                        borderRadius: ANT_BAR.x / 2,
-                        transform: [{ translateX: _AntMove }],
-                    }}
-                ></Animated.View>
+                    style={[
+                        {
+                            backgroundColor: Styles.activeTabs,
+                            position: "absolute",
+                            bottom: 10,
+                            left: Styles.tabBar.paddingHorizontal / 5,
+                        },
+                        AnimStyle,
+                    ]}
+                />
             )}
         </>
     ) : (

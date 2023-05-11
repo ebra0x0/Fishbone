@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 
 const ScreenX = Dimensions.get("screen").width;
 const styles = () => {
-    const { theme, lang } = useSelector((state) => state.user);
+    const { theme } = useSelector((state) => state.user);
     return StyleSheet.create({
         tabBar: {
             position: "absolute",
@@ -12,7 +12,7 @@ const styles = () => {
             paddingBottom: 10,
             bottom: 0,
             borderTopWidth: 0,
-            backgroundColor: "#00102380",
+            backgroundColor: theme ? "#00102380" : "#ebebeb80",
             alignItems: "center",
             elevation: 0,
         },

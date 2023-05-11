@@ -6,8 +6,6 @@ export { default as RegistrationScreen } from "./AuthScreens/RegistrationScreen"
 
 export { default as MetaData } from "./MetaData/MetaData";
 
-export { default as Discover } from "./Discover/Discover";
-
 export { default as Notifications } from "./Notifications/Notifications";
 
 export { default as Settings } from "./Settings/Settings";

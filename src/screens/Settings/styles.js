@@ -10,7 +10,15 @@ const styles = () => {
         container: {
             flex: 1,
             backgroundColor: Root.CONTAINER,
+            paddingTop: 100,
             paddingBottom: 50,
+        },
+        button: {
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#2196F3",
+            height: 50,
+            borderRadius: 25,
         },
         wrapper: {
             flexDirection: "column",

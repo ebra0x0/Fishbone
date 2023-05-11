@@ -5,21 +5,6 @@ import firestore from "@react-native-firebase/firestore";
 
 const __UPDATE_USER_STORAGE__ = (action, payload) => {
     switch (action) {
-        case "SET_POST":
-            payload && AsyncStorage.setItem("UserPost", JSON.stringify(payload));
-            break;
-        case "DEL_POST":
-            AsyncStorage.removeItem("UserPost");
-            break;
-        case "SET_ORDER":
-            payload && AsyncStorage.setItem("UserOrder", JSON.stringify(payload));
-            break;
-        case "DEL_ORDER":
-            AsyncStorage.removeItem("UserOrder");
-            break;
-        case "SET_FAV":
-            AsyncStorage.setItem("Favs", JSON.stringify(payload));
-            break;
         case "SET_THEME":
             AsyncStorage.setItem("THEME", JSON.stringify(payload));
             break;
@@ -57,7 +42,7 @@ export const User = createSlice({
         lang: I18nManager.isRTL ? "ar" : "en",
         data: null,
         userPost: null,
-        userOrder: null,
+        PendingOrder: null,
         favorites: [],
         Token: "",
         deviceLocation: null,
@@ -79,36 +64,30 @@ export const User = createSlice({
             };
         },
         Set_User_Post: (state, action) => {
-            __UPDATE_USER_STORAGE__("SET_POST", action.payload);
             return {
                 ...state,
                 userPost: action.payload,
             };
         },
         Del_User_Post: (state) => {
-            __UPDATE_USER_STORAGE__("DEL_POST");
             return {
                 ...state,
                 userPost: false,
             };
         },
-        Set_User_Order: (state, action) => {
-            __UPDATE_USER_STORAGE__("SET_ORDER");
+        Set_PendingOrder: (state, action) => {
             return {
                 ...state,
-                userOrder: action.payload,
+                PendingOrder: action.payload,
             };
         },
-        Del_User_Order: (state) => {
-            __UPDATE_USER_STORAGE__("DEL_ORDER");
+        Del_PendingOrder: (state) => {
             return {
                 ...state,
-                userOrder: null,
+                PendingOrder: null,
             };
         },
         Set_Favorites: (state, action) => {
-            __UPDATE_USER_STORAGE__("SET_FAV", action.payload);
-
             return {
                 ...state,
                 favorites: action.payload,

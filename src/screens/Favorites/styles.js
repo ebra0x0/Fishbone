@@ -9,6 +9,7 @@ const styles = () => {
         container: {
             flex: 1,
             backgroundColor: Root.CONTAINER,
+            paddingTop: 100,
             paddingBottom: 50,
         },
         wrapper: {
@@ -26,11 +27,7 @@ const styles = () => {
         avatar: {
             width: 48,
             height: 48,
-            backgroundColor: Root.AVATAR,
             borderRadius: 48 / 2,
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
         },
     });
 };

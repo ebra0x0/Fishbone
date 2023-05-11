@@ -1,18 +1,22 @@
 import { StyleSheet } from "react-native";
 import RootColor from "../../RootColor";
+import { useSelector } from "react-redux";
 
 const styles = () => {
+    const { theme } = useSelector((state) => state.user);
     const Root = RootColor();
 
     return StyleSheet.create({
         container: {
             flex: 1,
             backgroundColor: Root.CONTAINER,
+            paddingTop: 100,
             paddingBottom: 50,
         },
         wrapper: {
-            paddingHorizontal: 30,
+            paddingHorizontal: 20,
             minHeight: 580,
+            paddingTop: 20,
         },
         pickImageBtn: {
             width: "100%",
@@ -22,6 +26,8 @@ const styles = () => {
             marginBottom: 60,
             backgroundColor: Root.VIEW,
             borderRadius: 4,
+            shadowColor: "#878787",
+            elevation: theme ? 0 : 20,
             overflow: "hidden",
         },
         input: {

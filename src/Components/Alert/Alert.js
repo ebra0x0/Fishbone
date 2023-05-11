@@ -1,55 +1,106 @@
-import React, { useState, useEffect } from "react";
-import { Image, Keyboard, Text } from "react-native";
-import { HStack, Center } from "native-base";
-import RootColor from "../../RootColor";
+import React from "react";
+import { View, Text, Image, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import styles from "./styles";
+import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 
-const ALert = (props) => {
-    const { status, msg } = props;
-    const [toast, setToast] = useState({ icon: "", iconColor: "", status: "", msg: "" });
-    const Root = RootColor();
+const Alert = (props) => {
+    const Styles = styles();
+    const { data } = useSelector((state) => state.user);
+    const navigation = useNavigation();
 
-    const Icons = {
-        error: require("../../../assets/warning.png"),
-        success: require("../../../assets/success.png"),
+    const openMsg = (key) => {
+        navigation.navigate("notifications", { New: key });
+
+        props.close([]);
     };
 
-    useEffect(() => {
-        Keyboard.dismiss();
-        switch (status) {
-            case "success":
-                setToast({ icon: Icons.success, status: Root.GREEN, msg });
-                break;
-            case "error":
-                setToast({ icon: Icons.error, status: Root.ERR_TXT, msg });
-                break;
-            default:
-                setToast({ icon: Icons.error, status: "", msg: "" });
-                break;
-        }
-    }, [props]);
+    const Restarant_Alert = () => {
+        return (
+            <View style={Styles.msgWrapper}>
+                <View style={Styles.title}>
+                    <Image style={Styles.icon} source={require("../../../assets/new-message.png")} />
+                    <Text style={Styles.titleTxt}>New Orders</Text>
+                </View>
+
+                <View style={Styles.msg}>
+                    <Text style={Styles.msgTxt}>
+                        You got{" "}
+                        <Text style={{ color: "#0dbc79", fontWeight: "bold" }}>{props.data?.length}</Text> new
+                        orders
+                    </Text>
+                </View>
+
+                <View style={Styles.btnCont}>
+                    <TouchableOpacity style={Styles.btn} onPress={() => openMsg(props.data[0]?.orderKey)}>
+                        <Text style={{ color: "#fff" }}>OPEN</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity style={Styles.close} onPress={() => props.close([])}>
+                    <Ionicons name="close" size={25} color={Styles.close.color} />
+                </TouchableOpacity>
+            </View>
+        );
+    };
+    const User_Alert = () => {
+        const result = props.data[0]?.result === "true";
+
+        return (
+            <View style={Styles.msgWrapper}>
+                <View style={Styles.title}>
+                    {result ? (
+                        <Image style={Styles.icon} source={require("../../../assets/success.png")} />
+                    ) : (
+                        <Image style={Styles.icon} source={require("../../../assets/close.png")} />
+                    )}
+                    <Text style={Styles.titleTxt}>{result ? "Accepted Order" : "Rejected Order"}</Text>
+                </View>
+
+                <View style={Styles.msg}>
+                    <Text style={Styles.msgTxt}>
+                        Your order has been{" "}
+                        <Text
+                            style={{
+                                fontWeight: "bold",
+                                color: result ? "#0dbc79" : "#FF2763",
+                            }}
+                        >
+                            {result ? "accepted" : "rejected"}
+                        </Text>
+                    </Text>
+                </View>
+
+                {result && (
+                    <View style={Styles.btnCont}>
+                        <TouchableOpacity style={Styles.btn} onPress={() => openMsg(props.data[0]?.orderKey)}>
+                            <Text style={{ color: "#fff" }}>OPEN</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                <TouchableOpacity style={Styles.close} onPress={() => props.close([])}>
+                    <Ionicons name="close" size={25} color={Styles.close.color} />
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
     return (
-        <Center
-            style={{ backgroundColor: Root.VIEW, borderLeftWidth: 4, borderColor: toast.status }}
-            width="320"
-            px="3"
-            py="3"
-            rounded="sm"
-            mb={-10}
+        <View
+            style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "#00000080",
+            }}
         >
-            <HStack
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                }}
-                space={2}
-            >
-                <Image style={{ width: 20, height: 20 }} source={toast.icon} />
-                <Text style={{ flex: 1, color: Root.VIEW_TXT }} fontSize="md">
-                    {toast.msg}
-                </Text>
-            </HStack>
-        </Center>
+            {data.restaurant ? <Restarant_Alert /> : <User_Alert />}
+        </View>
     );
 };
 
-export default ALert;
+export default Alert;

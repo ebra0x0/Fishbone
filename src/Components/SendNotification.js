@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const SendNotification = async (Data) => {
-    const { topic, token, title, msg, image, action } = Data;
+    const { topic, token, title, msg, image, extraData } = Data;
 
     const fcmUrl = "https://fcm.googleapis.com/fcm/send";
     const fcmApiKey =
@@ -12,14 +12,12 @@ const SendNotification = async (Data) => {
         image: image,
         android: {
             priority: "high",
-            notification: {
-                color: "#FFCC00",
-                clickAction: action,
-            },
+            vibrate: [500, 250, 500],
         },
     };
     const data = {
         notification,
+        data: { ...extraData },
         to: `${topic ? `/topics/${topic}` : token}`,
     };
     const headers = {
@@ -28,9 +26,7 @@ const SendNotification = async (Data) => {
     };
 
     try {
-        const response = await axios.post(fcmUrl, data, { headers });
-
-        console.log("Notification sent:", response.data);
+        axios.post(fcmUrl, data, { headers });
     } catch (error) {
         console.error("Error sending notification:", error.message);
     }

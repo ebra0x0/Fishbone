@@ -19,7 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Avatar from "../../Components/Avatar/Avatar";
 import { useEffect } from "react";
 import Translations from "../../Languages";
-import ALert from "../../Components/Alert/Alert";
+import TOAST from "../../Components/Toast/Toast";
 import { Toast } from "native-base";
 
 export default () => {
@@ -37,6 +37,7 @@ export default () => {
     });
     const [allDone, setAllDone] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [loadingSignOut, setLoadingSignOut] = useState(false);
 
     const dispatch = useDispatch();
 
@@ -77,7 +78,7 @@ export default () => {
                 .catch((e) => console.log(e));
             Toast.show({
                 render: () => {
-                    return <ALert status="success" msg="Profile Updated" />;
+                    return <TOAST status="success" msg="Profile Updated" />;
                 },
                 duration: 2000,
             });
@@ -85,6 +86,7 @@ export default () => {
     };
 
     const SignOut = async () => {
+        setLoadingSignOut(true);
         await messaging().deleteToken();
         auth()
             .signOut()
@@ -100,19 +102,20 @@ export default () => {
                     {data?.photo && (
                         <ImageBackground
                             style={{
-                                position: "absolute",
                                 width: "100%",
                                 height: "100%",
-                                opacity: 0.3,
-                                backgroundColor: "#000000",
+                                opacity: 0.5,
+                                backgroundColor: "#000",
                             }}
                             source={{ uri: data?.photo }}
-                            blurRadius={30}
+                            blurRadius={40}
                         />
                     )}
 
-                    <Avatar upload={true} />
-                    <Text style={Styles.titleName}>{data?.Name}</Text>
+                    <View style={{ position: "absolute", alignItems: "center" }}>
+                        <Avatar upload={true} style={Styles.avatar} />
+                        <Text style={Styles.titleName}>{data?.Name}</Text>
+                    </View>
                 </View>
 
                 <KeyboardAwareScrollView style={Styles.formContainer} keyboardShouldPersistTaps="handled">
@@ -224,7 +227,11 @@ export default () => {
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={SignOut}>
-                                <Ionicons name="log-out-outline" size={25} color="#ff7762" />
+                                {loadingSignOut ? (
+                                    <ActivityIndicator size={25} color="#ff7762" />
+                                ) : (
+                                    <Ionicons name="log-out-outline" size={25} color="#ff7762" />
+                                )}
                             </TouchableOpacity>
                         </View>
                     </View>

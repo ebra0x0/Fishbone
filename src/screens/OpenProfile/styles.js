@@ -8,6 +8,7 @@ const styles = () => {
         container: {
             flex: 1,
             backgroundColor: Root.CONTAINER,
+            paddingTop: 100,
             paddingBottom: 50,
         },
         header: {
@@ -20,12 +21,8 @@ const styles = () => {
             width: 150,
             height: 150,
             borderRadius: 150 / 2,
-            backgroundColor: "#1e1e1e",
-            justifyContent: "center",
-            alignItems: "center",
         },
         wrapper: {
-            paddingTop: 40,
             paddingHorizontal: 20,
         },
         row: {

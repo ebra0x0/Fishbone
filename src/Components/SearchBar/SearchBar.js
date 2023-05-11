@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput } from "react-native";
+import { View, TextInput, TouchableOpacity } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
 import Translations from "../../Languages";
+import { Ionicons } from "@expo/vector-icons";
 
 const SearchBar = (props) => {
     const { theme } = useSelector((state) => state.user);
@@ -11,28 +12,61 @@ const SearchBar = (props) => {
     const [results, setResults] = useState([]);
 
     const $UsersRef = firestore().collection("users");
+    const $PostsRef = firestore().collection("posts");
 
     useEffect(() => {
-        Search(srchValue);
+        props.searchType === "food" && foodSearch(srchValue);
+        props.searchType === "restaurant" && restaurantSearch(srchValue);
     }, [srchValue]);
     useEffect(() => {
+        setResults([]);
+        props.searchType === "food" && foodSearch(srchValue);
+        props.searchType === "restaurant" && restaurantSearch(srchValue);
+    }, [props.searchType]);
+    useEffect(() => {
+        props.loading(false);
         props.update(results);
     }, [results]);
 
-    const Search = (value) => {
+    const foodSearch = (value) => {
         if (value) {
+            props.loading(true);
             const lower = value.toLowerCase().trim();
+            $PostsRef
+                .orderBy("foodTypeLower", "desc")
+                .where("foodTypeLower", ">=", lower)
+                .where("foodTypeLower", "<=", lower + "\uf8ff")
+                .get()
+                .then((query) => {
+                    const matching = [];
+
+                    query.forEach((post) => {
+                        matching.push({ ...post.data(), key: post.id });
+                    });
+
+                    setResults(matching);
+                })
+                .catch((e) => console.log(e));
+        } else {
+            setResults([]);
+        }
+    };
+    const restaurantSearch = (value) => {
+        if (value) {
+            props.loading(true);
+            const lower = value.toLowerCase().trim();
+            console.log(lower);
             $UsersRef
-                .orderBy("userName", "desc")
                 .where("restaurant", "==", true)
                 .where("userName", ">=", lower)
                 .where("userName", "<=", lower + "\uf8ff")
+                .orderBy("userName", "desc")
                 .get()
                 .then((query) => {
                     const matching = [];
 
                     query.forEach((rest) => {
-                        matching.push(rest.data());
+                        matching.push({ ...rest.data(), key: rest.id });
                     });
 
                     setResults(matching);
@@ -56,11 +90,11 @@ const SearchBar = (props) => {
                         height: 38,
                         paddingHorizontal: 14,
                         borderRadius: 38 / 2,
-                        backgroundColor: theme ? "#022048" : "#dcdcdc",
+                        backgroundColor: theme ? "#022048" : "#f0f0f0",
                         color: "#919191",
                         textAlign: "left",
                     },
-                    focus && { backgroundColor: theme ? "#02285a" : "#fff" },
+                    focus && { backgroundColor: theme ? "#02285a" : "#e9e9e9" },
                 ]}
                 placeholder={Translations().t("searchBar")}
                 placeholderTextColor="#909090"
@@ -74,6 +108,15 @@ const SearchBar = (props) => {
                     setFocus(false);
                 }}
             />
+
+            {srchValue && (
+                <TouchableOpacity
+                    style={{ position: "absolute", top: 9, right: 30 }}
+                    onPress={() => setSrchValue("")}
+                >
+                    <Ionicons name="close" size={20} color={theme ? "#fff" : "#808080"} />
+                </TouchableOpacity>
+            )}
         </View>
     );
 };

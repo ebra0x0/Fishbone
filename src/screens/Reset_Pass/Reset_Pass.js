@@ -5,7 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import Translations from "../../Languages";
 import { Toast } from "native-base";
-import ALert from "../../Components/Alert/Alert";
+import TOAST from "../../Components/Toast/Toast";
+import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 
 const Reset_Pass = ({ navigation }) => {
     const Styles = styles();
@@ -44,7 +45,7 @@ const Reset_Pass = ({ navigation }) => {
                     .then(() => {
                         Toast.show({
                             render: () => {
-                                return <ALert status="success" msg="Check your email to reset password." />;
+                                return <TOAST status="success" msg="Check your email to reset password." />;
                             },
                             duration: 3000,
                         });
@@ -62,7 +63,7 @@ const Reset_Pass = ({ navigation }) => {
         } else {
             Toast.show({
                 render: () => {
-                    return <ALert status="error" msg="Please set a valid email !" />;
+                    return <TOAST status="error" msg="Please set a valid email !" />;
                 },
                 duration: 2000,
             });
@@ -70,8 +71,11 @@ const Reset_Pass = ({ navigation }) => {
         }
     };
 
+    const HeaderTitle = "Reset Password";
+
     return (
         <View style={Styles.container}>
+            <ScreenHeader arrow={true} title={HeaderTitle} />
             <TouchableOpacity
                 style={{ position: "absolute", top: 50, left: 20 }}
                 onPress={() => navigation.goBack()}

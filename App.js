@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { I18nManager, Linking } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { I18nManager, Linking, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import publicIp from "react-native-public-ip";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
 import store from "./src/Store/store";
@@ -20,7 +20,8 @@ import messaging from "@react-native-firebase/messaging";
 import { decode, encode } from "base-64";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NativeBaseProvider, Toast } from "native-base";
-import ALert from "./src/Components/Alert/Alert";
+import TOAST from "./src/Components/Toast/Toast";
+import Alert from "./src/Components/Alert/Alert";
 
 if (!global.btoa) {
     global.btoa = encode;
@@ -35,13 +36,12 @@ const App = () => {
     const [connection, setConnection] = useState(true);
     const [booting, setBooting] = useState(true);
     const [Token, setToken] = useState("");
-    const [msg, setMsg] = useState(null);
+    const [msgs, setMsgs] = useState([]);
     const [logged, setLogged] = useState(false);
     const [Theme, setTheme] = useState(theme);
     const [confPhoto, setConfPhoto] = useState({ has: null, orderId: "" });
 
     const usersRef = firestore().collection("users");
-    const Stack = createStackNavigator();
 
     I18nManager.allowRTL(true);
     I18nManager.swapLeftAndRightInRTL(false);
@@ -51,7 +51,6 @@ const App = () => {
         onStoreChanged();
         Net_State();
         Get_Token();
-        Notifications_Handelr();
         Notifications_Listeners();
 
         auth()
@@ -59,7 +58,7 @@ const App = () => {
             .catch(() => {
                 Toast.show({
                     render: () => {
-                        return <ALert status="error" msg="Your account has been deleted!" />;
+                        return <TOAST status="error" msg="Your account has been deleted!" />;
                     },
                     duration: 2000,
                 });
@@ -83,9 +82,6 @@ const App = () => {
             setLogged(false);
         }
     }, [userData]);
-    useEffect(() => {
-        logged && msg && console.log(msg);
-    }, [msg]);
 
     useEffect(() => {
         Token && store.dispatch({ type: "userData/Set_Token", payload: Token });
@@ -117,27 +113,33 @@ const App = () => {
         }
     };
 
-    const Notifications_Handelr = () => {
-        // When react with notifications and app is terminated will open the app
-
-        messaging()
-            .getInitialNotification()
-            .then((remoteMessage) => {
-                if (remoteMessage) {
-                    console.log(remoteMessage.notification);
-                }
-            });
-    };
-
     const Notifications_Listeners = () => {
         // Notifications listiner in background
         messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-            setMsg(remoteMessage.notification);
+            // Save messages list in storage
+            const currentMessages = await AsyncStorage.getItem("MESSAGES");
+
+            const messageArray = currentMessages ? JSON.parse(currentMessages) : [];
+            messageArray.push(remoteMessage.data);
+
+            await AsyncStorage.setItem("MESSAGES", JSON.stringify(messageArray));
         });
 
         // Notifications listiner in foreground
         messaging().onMessage(async (remoteMessage) => {
-            setMsg(remoteMessage.notification);
+            Handle_Msgs([remoteMessage.data]);
+        });
+    };
+
+    const Handle_Msgs = (msgs) => {
+        const newMsgs = [];
+        msgs.forEach((msg, indx) => {
+            if (msg.orderKey) {
+                newMsgs.push(msg);
+            }
+            if (msgs.length === indx + 1) {
+                setMsgs(newMsgs);
+            }
         });
     };
 
@@ -181,6 +183,9 @@ const App = () => {
                     case "LANG":
                         store.dispatch({ type: "userData/Set_Lang", payload: item });
                         break;
+                    case "MESSAGES":
+                        Handle_Msgs(item);
+                        break;
                 }
             });
         });
@@ -194,36 +199,35 @@ const App = () => {
         });
     };
 
-    NavigationBar.setBackgroundColorAsync(theme ? "#00152d" : "#ccc");
+    NavigationBar.setBackgroundColorAsync(Theme ? "#00152d" : "#ccc");
 
     return (
         <Provider store={store}>
             <NativeBaseProvider>
-                <StatusBar style={Theme ? "light" : "dark"} />
+                <StatusBar
+                    backgroundColor={Theme ? "#00142f33" : "#ebebeb4d"}
+                    style={Theme ? "light" : "dark"}
+                />
                 <NavigationContainer>
-                    <Stack.Navigator
-                        screenOptions={{
-                            headerShown: false,
-                            animationEnabled: false,
-                        }}
-                    >
-                        {connection ? (
-                            <>
-                                {booting && <Stack.Screen name="boot" component={Boot} />}
-                                {logged ? (
-                                    confPhoto.has ? (
-                                        <Stack.Screen name="ConfPhoto" component={ConfPhoto} />
-                                    ) : (
-                                        <Stack.Screen name="AccNavigators" component={AccNavigators} />
-                                    )
+                    {connection ? (
+                        <>
+                            {booting && <Boot />}
+                            {logged ? (
+                                confPhoto.has ? (
+                                    <ConfPhoto />
                                 ) : (
-                                    <Stack.Screen name="AuthNavigators" component={AuthNavigators} />
-                                )}
-                            </>
-                        ) : (
-                            <Stack.Screen name="noConnection" component={NoConnection} />
-                        )}
-                    </Stack.Navigator>
+                                    <>
+                                        <AccNavigators />
+                                        {msgs.length ? <Alert data={msgs} close={setMsgs} /> : false}
+                                    </>
+                                )
+                            ) : (
+                                <AuthNavigators />
+                            )}
+                        </>
+                    ) : (
+                        <NoConnection />
+                    )}
                 </NavigationContainer>
             </NativeBaseProvider>
         </Provider>

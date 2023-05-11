@@ -9,8 +9,9 @@ import VirifyPhone from "../../../Components/VerifiyPhone/VirifyPhone";
 import styles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import Translations from "../../../Languages";
+import { memo } from "react";
 
-const AccountType = ({ route }) => {
+const AccountType = (props) => {
     const Styles = styles();
     const { data, lang } = useSelector((state) => state.user);
     const [loading, setLoading] = useState(false);
@@ -18,10 +19,10 @@ const AccountType = ({ route }) => {
     const [location, setLocation] = useState(null);
     const [fullName, setFullName] = useState({ value: "", valid: null, err: "" });
     const [address, setAddress] = useState({ value: "", valid: null, err: "" });
-    const [verifyedPhone, setVerifyedPhone] = useState("01205262745");
+    const [verifyedPhone, setVerifyedPhone] = useState("");
     const [allDone, setAllDone] = useState(false);
 
-    const { rest } = route.params;
+    const { rest } = props;
 
     const dispatch = useDispatch();
 
@@ -114,11 +115,14 @@ const AccountType = ({ route }) => {
         <View style={Styles.container}>
             <Text style={Styles.header}>{rest ? CONTENT.acctyperestTitle : CONTENT.acctypeuserTitle}</Text>
             <View style={Styles.wrapper}>
-                <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
+                <KeyboardAwareScrollView
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
                     <View style={Styles.avatarCont}>
-                        <Avatar upload={false} disabled={loading} />
+                        <Avatar style={Styles.avatar} upload={false} disabled={loading} />
                     </View>
-                    <View style={{ height: 430 }}>
+                    <View style={{ height: 450 }}>
                         <TouchableOpacity
                             style={Styles.row}
                             onPress={() => {
@@ -137,6 +141,7 @@ const AccountType = ({ route }) => {
                                 style={[Styles.row, Styles.input]}
                                 placeholder={CONTENT.acctypeName}
                                 placeholderTextColor="#7a7a7a"
+                                textAlign="right"
                                 maxLength={20}
                                 editable={!loading}
                                 value={fullName.value}
@@ -181,6 +186,7 @@ const AccountType = ({ route }) => {
                                 value={address.value}
                                 placeholder={rest ? CONTENT.acctyperestAddress : CONTENT.acctypeuserAddress}
                                 placeholderTextColor="#7a7a7a"
+                                textAlign="right"
                                 maxLength={60}
                                 editable={!loading}
                                 onChangeText={(txt) => {
@@ -240,4 +246,4 @@ const AccountType = ({ route }) => {
         </View>
     );
 };
-export default AccountType;
+export default memo(AccountType);

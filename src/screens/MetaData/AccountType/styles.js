@@ -26,6 +26,11 @@ const styles = () => {
             justifyContent: "center",
             alignItems: "center",
         },
+        avatar: {
+            width: 120,
+            height: 120,
+            borderRadius: 120 / 2,
+        },
         row: {
             flexDirection: lang == "en" ? "row" : "row-reverse",
             marginVertical: 7,

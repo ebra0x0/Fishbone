@@ -1,5 +1,14 @@
-import React, { useRef, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, Keyboard } from "react-native";
+import React, { useRef, useState, memo } from "react";
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    ActivityIndicator,
+    Image,
+    Keyboard,
+    TouchableHighlight,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./styles";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
@@ -7,16 +16,16 @@ import Translations from "../../Languages";
 import firestore from "@react-native-firebase/firestore";
 import storage from "@react-native-firebase/storage";
 import * as ImagePicker from "expo-image-picker";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import ALert from "../../Components/Alert/Alert";
-import { Button, HStack, Toast } from "native-base";
+import TOAST from "../../Components/Toast/Toast";
+import { HStack, Toast } from "native-base";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import SendNotification from "../../Components/SendNotification";
 
 const CreatePost = ({ navigation }) => {
-    const { data, theme } = useSelector((state) => state.user);
+    const { data, theme, lang } = useSelector((state) => state.user);
     const [foodType, setFoodType] = useState("");
     const [postDesc, setPostDesc] = useState("");
     const [closedTime, setClosedTime] = useState({ value: new Date(), valid: false });
@@ -39,23 +48,11 @@ const CreatePost = ({ navigation }) => {
         postFoodContains: Translations().t("postFoodContains"),
         postClosedTime: Translations().t("postClosedTime"),
         postCreateBtn: Translations().t("postCreateBtn"),
-        homePickAt: Translations().t("homePickAt"),
+        postPickAt: Translations().t("postPickAt"),
         Now: Translations().t("Now"),
     };
 
-    const HeaderTitle = (
-        <Text
-            style={{
-                flex: 1,
-                marginLeft: 6,
-                fontSize: 30,
-                color: theme ? "#fff" : "#252525",
-                fontWeight: "bold",
-            }}
-        >
-            {Translations().t("postTitle")}
-        </Text>
-    );
+    const HeaderTitle = Translations().t("postTitle");
 
     useEffect(() => {
         return () => {
@@ -120,7 +117,7 @@ const CreatePost = ({ navigation }) => {
             setClosedTime({ value, valid: false });
             Toast.show({
                 render: () => {
-                    return <ALert status="error" msg="You closed already !" />;
+                    return <TOAST status="error" msg="You closed already !" />;
                 },
                 duration: 2000,
             });
@@ -160,12 +157,12 @@ const CreatePost = ({ navigation }) => {
                             const timestamp = firestore.FieldValue.serverTimestamp();
                             const now = firestore.Timestamp.now();
                             const closedIn = firestore.Timestamp.fromDate(closedTime.value);
-
                             const $ReqData = {
                                 active: true,
                                 date: timestamp,
                                 postImage: imgUrl,
                                 foodType,
+                                foodTypeLower: foodType.toLocaleLowerCase(),
                                 postDesc,
                                 closedIn,
                                 id: data?.id,
@@ -182,21 +179,13 @@ const CreatePost = ({ navigation }) => {
                                     ...$ReqData,
                                     key: newPost.id,
                                     date: now,
+                                    closedIn: closedTime.value,
                                     elapsed: CONTENT.Now,
-                                    pickAt: `${CONTENT.homePickAt} ${now
-                                        .toDate()
-                                        .getHours()
-                                        .toString()
-                                        .padStart(2, "0")} - ${closedIn
-                                        .toDate()
-                                        .getHours()
-                                        .toString()
-                                        .padStart(2, "0")}`,
-                                    distance: 0,
-                                    has: true,
                                 };
+
                                 //Save post to private posts
                                 await $User_Ref.collection("posts").doc(newPost.id).set($ReqData);
+
                                 // Save to app
                                 dispatch({
                                     type: "userData/Set_User_Post",
@@ -205,18 +194,18 @@ const CreatePost = ({ navigation }) => {
                                 // Send new post to users
                                 SendNotification({
                                     topic: "users",
-                                    title: "New Leftovers Post",
+                                    title: "New Post",
                                     msg: `${data?.Name} has leftover ${foodType} let's take a look`,
                                     image: imgUrl,
                                 });
 
                                 Toast.show({
                                     render: () => {
-                                        return <ALert status="success" msg="Post created successfully." />;
+                                        return <TOAST status="success" msg="Post created successfully" />;
                                     },
                                     duration: 2000,
                                 });
-                                navigation.navigate("Main");
+                                navigation.goBack();
                             });
                         } else {
                             setLoading(false);
@@ -234,7 +223,7 @@ const CreatePost = ({ navigation }) => {
 
     return (
         <View style={Styles.container}>
-            <ScreenHeader title={HeaderTitle} arrow={() => navigation.goBack()} />
+            <ScreenHeader title={HeaderTitle} arrow={true} />
 
             <KeyboardAwareScrollView keyboardShouldPersistTaps={"handled"}>
                 <View style={Styles.wrapper}>
@@ -245,11 +234,10 @@ const CreatePost = ({ navigation }) => {
                         {image ? (
                             <Image style={{ width: "100%", height: "100%" }} source={{ uri: image }} />
                         ) : (
-                            <Ionicons
-                                style={{ paddingLeft: 4 }}
-                                name="add-outline"
-                                size={60}
-                                color="#919191"
+                            <MaterialCommunityIcons
+                                name="plus"
+                                size={50}
+                                color={theme ? "#fff" : "#252525"}
                             />
                         )}
                     </TouchableOpacity>
@@ -273,10 +261,17 @@ const CreatePost = ({ navigation }) => {
                         onChangeText={(txt) => setPostDesc(txt)}
                     />
 
-                    <Button
-                        colorScheme={closedTime.valid ? "emerald" : "gray"}
+                    <TouchableHighlight
+                        style={{
+                            backgroundColor: closedTime.valid ? "#0ba469" : "#676767",
+                            height: 50,
+                            borderRadius: 7,
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
                         onPress={showMode}
                         disabled={loading}
+                        underlayColor={closedTime.valid ? "#098d5a" : "#505050"}
                     >
                         <HStack alignItems={"center"}>
                             <Ionicons name="time-outline" size={25} color="#fff" />
@@ -284,7 +279,7 @@ const CreatePost = ({ navigation }) => {
                                 {CONTENT.postClosedTime}
                             </Text>
                         </HStack>
-                    </Button>
+                    </TouchableHighlight>
 
                     <View style={Styles.saveBtnCont}>
                         <TouchableOpacity
@@ -305,4 +300,4 @@ const CreatePost = ({ navigation }) => {
     );
 };
 
-export default CreatePost;
+export default memo(CreatePost);

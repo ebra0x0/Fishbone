@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import {
     View,
     Text,
@@ -8,10 +8,11 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     RefreshControl,
+    TouchableHighlight,
 } from "react-native";
 import Styles from "./Styles";
 import firestore from "@react-native-firebase/firestore";
-import { createStackNavigator } from "@react-navigation/stack";
+import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import OpenProfile from "../OpenProfile/OpenProfile";
@@ -19,16 +20,33 @@ import GetDirections from "../../Components/GetDirections";
 import Translations from "../../Languages";
 import SendNotification from "../../Components/SendNotification";
 import { Toast } from "native-base";
-import ALert from "../../Components/Alert/Alert";
+import TOAST from "../../Components/Toast/Toast";
+import { Linking } from "react-native";
+import Animated, {
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from "react-native-reanimated";
+import Avatar from "../../Components/Avatar/Avatar";
+import { memo } from "react";
 
-export default () => {
+export default ({ route }) => {
     const styles = Styles();
-    const { data, theme } = useSelector((state) => state.user);
+    const { data, lang, theme, PendingOrder } = useSelector((state) => state.user);
     const [Orders, setOrders] = useState([]);
+    const [newOrders, setNewOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingFooter, setLoadingFooter] = useState(false);
     const [lastOrder, setLastOrder] = useState(null);
-    const [hasPindingOrders, setHasPindingOrders] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const _AnimScale = useSharedValue(1);
+    const AnimStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: _AnimScale.value }],
+        };
+    });
 
     const limit = 10;
     const $Users_Ref = firestore().collection("users");
@@ -46,8 +64,31 @@ export default () => {
     useEffect(() => {
         Fetch();
     }, []);
+    useEffect(() => {
+        if (route.params?.New) {
+            !loading && Fetch();
+        }
+    }, [route.params]);
+
+    useEffect(() => {
+        newOrders.length && Orders.length && Animate();
+    }, [newOrders]);
 
     //Functions
+
+    const clearNewOrders = useCallback(() => {
+        setNewOrders([]);
+    });
+    const Animate = () => {
+        setTimeout(() => {
+            _AnimScale.value = withSpring(0.6, {}, (end) => {
+                if (end) {
+                    _AnimScale.value = withTiming(1, { mass: 0.4, damping: 2 });
+                    runOnJS(clearNewOrders)();
+                }
+            });
+        }, 500);
+    };
 
     const __Get_Elapsed__ = (date) => {
         if (date) {
@@ -64,13 +105,13 @@ export default () => {
                 if (s < 5) {
                     return CONTENT.Now;
                 }
-                return s + "s";
+                return lang === "en" ? "s" : "ث" + s;
             } else if (m < 60) {
-                return m + "m";
+                return lang === "en" ? "m" : "د" + m;
             } else if (h < 24) {
-                return h + "h";
+                return lang === "en" ? "h" : "س" + h;
             } else {
-                return d + "d";
+                return lang === "en" ? "d" : "ي" + d;
             }
         } else {
             return "";
@@ -79,22 +120,27 @@ export default () => {
 
     const Fetch = async () => {
         try {
+            setLoading(true);
             const querySnapshot = await $Orders_Ref.orderBy("date", "desc").limit(limit).get();
 
             if (querySnapshot.size) {
                 const newOrders = [];
+                const New = [];
 
                 querySnapshot.forEach(async (order, indx) => {
-                    const { source, dest, date, accepted, delievered, submitDate, approvalDate } =
+                    const { source, dest, date, accepted, delievered, submitDate, approvalDate, seened } =
                         order.data();
                     const dateType = submitDate ? submitDate : approvalDate ? approvalDate : date;
-                    (delievered || accepted == false) && order.ref.update({ seened: true });
-                    accepted == undefined && setHasPindingOrders(true);
+
+                    delievered !== undefined && order.ref.update({ seened: true });
 
                     if (!data?.restaurant && accepted === undefined) {
                         indx + 1 == querySnapshot.size && setLoading(false);
                         return;
+                    } else if (!seened) {
+                        New.push({ key: order.id });
                     }
+
                     await $Users_Ref
                         .doc(data?.restaurant ? source : dest)
                         .get()
@@ -115,10 +161,12 @@ export default () => {
                         setOrders(newOrders);
                         setLastOrder(querySnapshot.docs[querySnapshot.size - 1]);
                         setLoading(false);
+                        setNewOrders(New);
                     }
                 });
             } else {
                 setLoading(false);
+                setOrders([]);
             }
         } catch (error) {
             setLoading(false);
@@ -127,7 +175,7 @@ export default () => {
     };
 
     const Fetch_More = async () => {
-        if (loading) return;
+        if (loading || loadingFooter) return;
         try {
             if (data) {
                 const querySnapshot = await $Orders_Ref
@@ -137,23 +185,26 @@ export default () => {
                     .get();
 
                 const newOrders = [];
+                const New = [];
 
                 if (querySnapshot.size) {
-                    console.log("got new orders");
-
+                    setLoadingFooter(true);
                     querySnapshot.docs.forEach(async (order, indx) => {
-                        const { source, date, accepted, delievered, submitDate, approvalDate } = order.data();
+                        const { source, dest, date, accepted, delievered, submitDate, approvalDate, seened } =
+                            order.data();
                         const dateType = submitDate ? submitDate : approvalDate ? approvalDate : date;
 
-                        (delievered || accepted == false) && order.ref.update({ seened: true });
-                        accepted == undefined && setHasPindingOrders(true);
+                        delievered !== undefined && order.ref.update({ seened: true });
+
                         if (!data?.restaurant && accepted === undefined) {
-                            indx + 1 == querySnapshot.size && setLoading(false);
+                            indx + 1 == querySnapshot.size && setLoadingFooter(false);
                             return;
+                        } else if (!seened) {
+                            New.push({ key: order.id });
                         }
 
                         await $Users_Ref
-                            .doc(source)
+                            .doc(data?.restaurant ? source : dest)
                             .get()
                             .then((user) => {
                                 newOrders.push({
@@ -163,38 +214,41 @@ export default () => {
                                     elapsed: __Get_Elapsed__(dateType),
                                 });
                             })
-                            .catch(() => setLoading(false));
+                            .catch(() => setLoadingFooter(false));
 
                         if (indx + 1 == querySnapshot.size) {
+                            New.length && setNewOrders(New);
                             newOrders.length && setOrders((prev) => [...prev, ...newOrders]);
                             newOrders.length && setLastOrder(querySnapshot.docs[querySnapshot.size - 1]);
-                            setLoading(false);
+                            setLoadingFooter(false);
                         }
                     });
                 } else {
-                    setLoading(false);
+                    setLoadingFooter(false);
                 }
             }
         } catch (e) {
-            setLoading(false);
+            setLoadingFooter(false);
             console.log("Error fetching more orders:", e);
         }
     };
 
-    const Approval = async (accepted, userId, orderId, postId) => {
+    const Approval = async (accepted, token, userId, orderId, postId) => {
         const timestamp = firestore.FieldValue.serverTimestamp();
         const now = firestore.Timestamp.now();
 
         const notificationData = {
-            token: userId,
-            title: `Your order has been ${accepted ? "approved" : "rejected"}`,
-            msg: `${data?.Name} has ${accepted ? "approved" : "rejected"} your order ${
-                accepted && "enter to see directions"
+            token: token,
+            title: `${accepted ? "Accepted Order" : "Rejected Order"}`,
+            msg: `${data?.Name} has ${accepted ? "accepted" : "rejected"} your order ${
+                accepted && "let's see the directions"
             }`,
+            extraData: { orderKey: orderId, result: accepted },
         };
         const approvalData = {
             accepted,
             approvalDate: timestamp,
+            seened: !accepted,
         };
         if (!accepted) {
             approvalData.delievered = false;
@@ -202,7 +256,11 @@ export default () => {
 
         try {
             // Send approval for user
-            await $Users_Ref.doc(userId).collection("orders").doc(orderId).update(approvalData);
+            await $Users_Ref
+                .doc(userId)
+                .collection("orders")
+                .doc(orderId)
+                .update({ ...approvalData, seened: false });
 
             SendNotification(notificationData);
 
@@ -214,13 +272,17 @@ export default () => {
             const newOrders = [];
             Orders.forEach((order) => {
                 if (order.key == orderId) {
-                    newOrders.push({ ...order, ...approvalData, approvalDate: now, elapsed: CONTENT.Now });
+                    newOrders.push({
+                        ...order,
+                        ...approvalData,
+                        approvalDate: now,
+                        elapsed: CONTENT.Now,
+                    });
                 } else {
                     newOrders.push(order);
                 }
             });
             setOrders(newOrders);
-            setHasPindingOrders(false);
         } catch (e) {
             console.log(e);
         }
@@ -229,21 +291,26 @@ export default () => {
     const Refuse_All = () => {
         const timestamp = firestore.FieldValue.serverTimestamp();
         const now = firestore.Timestamp.now();
-        const refuseData = { accepted: false, delievered: false, approvalDate: timestamp };
-
-        const notificationData = {
-            title: `Your order rejected`,
-            msg: `Your order has been rejected by ${data?.Name}
-          }`,
-        };
+        const refuseData = { accepted: false, delievered: false, approvalDate: timestamp, seened: true };
 
         // Refuse all pinding orders
         Orders.forEach(async (order) => {
             const { key, id, accepted, postId, Token } = order;
 
+            const notificationData = {
+                title: "Rejected Order",
+                msg: `Your order has been rejected by ${data?.Name}
+            }`,
+                extraData: { orderKey: key, result: accepted },
+            };
+
             if (accepted == undefined) {
                 // Refuse user order
-                await $Users_Ref.doc(id).collection("orders").doc(key).update(refuseData);
+                await $Users_Ref
+                    .doc(id)
+                    .collection("orders")
+                    .doc(key)
+                    .update({ ...refuseData, seened: true });
 
                 SendNotification({ ...notificationData, token: Token });
 
@@ -257,16 +324,21 @@ export default () => {
                 const newOrders = [];
                 Orders.forEach((order) => {
                     if (order.accepted == undefined) {
-                        newOrders.push({ ...order, ...refuseData, approvalDate: now });
+                        newOrders.push({
+                            ...order,
+                            ...refuseData,
+                            approvalDate: now,
+                            elapsed: CONTENT.Now,
+                        });
                     } else {
                         newOrders.push(order);
                     }
                 });
                 setOrders(newOrders);
-                setHasPindingOrders(false);
+
                 Toast.show({
                     render: () => {
-                        return <ALert status="success" msg="All pending orders removed." />;
+                        return <TOAST status="success" msg="All pending orders removed." />;
                     },
                     duration: 2000,
                 });
@@ -278,17 +350,21 @@ export default () => {
         const timestamp = firestore.FieldValue.serverTimestamp();
         const now = firestore.Timestamp.now();
         const newOrders = [];
-        const submitData = { delievered: true, submitDate: timestamp };
+        const submitData = { delievered: true, submitDate: timestamp, seened: true };
 
         const notificationData = {
             token: userId,
-            title: `Your order is confirmed`,
-            msg: `${data?.Name} has confirmed receipt of your order
+            title: `Confirmed Order`,
+            msg: `${data?.Name} confirmed your order
           }`,
         };
 
         // Submit user order
-        await $Users_Ref.doc(userId).collection("orders").doc(orderId).update(submitData);
+        await $Users_Ref
+            .doc(userId)
+            .collection("orders")
+            .doc(orderId)
+            .update({ ...submitData, seened: false });
 
         SendNotification(notificationData);
 
@@ -301,16 +377,25 @@ export default () => {
         // Update order state
         Orders.forEach((order) => {
             order.key == orderId
-                ? newOrders.push({ ...order, ...submitData, submitDate: now })
+                ? newOrders.push({
+                      ...order,
+                      ...submitData,
+                      submitDate: now,
+                      elapsed: CONTENT.Now,
+                  })
                 : newOrders.push(order);
         });
         setOrders(newOrders);
     };
 
-    const __FLATLIST_NOTS__ = ({ navigation }) => {
+    const Call = (phone) => {
+        Linking.openURL(`tel:${phone}`);
+    };
+
+    const MAIN = memo(() => {
         const Buttons = [
             {
-                show: data?.restaurant && hasPindingOrders,
+                show: data?.restaurant && PendingOrder,
                 key: 1,
                 name: "trash-bin-outline",
                 size: 25,
@@ -328,38 +413,15 @@ export default () => {
                 );
             }
         });
-        const HeaderTitle = (
-            <Text
-                style={{
-                    textAlign: "left",
-                    flex: 1,
-                    marginLeft: 6,
-                    fontSize: 30,
-                    color: theme ? "#fff" : "#252525",
-                    fontWeight: "bold",
-                }}
-            >
-                {CONTENT.notfTitle}
-            </Text>
-        );
-        const renderItem = ({ item }) => {
+        const HeaderTitle = CONTENT.notfTitle;
+
+        const renderUserItems = ({ item }) => {
+            const isNew = newOrders.find((New) => (New.key === item.key ? true : false));
             return (
                 <View style={styles.OrdersCont}>
                     <View style={styles.order}>
                         <View style={styles.content}>
-                            <TouchableOpacity
-                                style={styles.avatar}
-                                onPress={() => navigation.push("OpenProfile", item)}
-                            >
-                                {item.photo ? (
-                                    <Image
-                                        style={{ width: "100%", height: "100%" }}
-                                        source={{ uri: item.photo }}
-                                    />
-                                ) : (
-                                    <Ionicons name="person" size={20} color="#2ebeff" />
-                                )}
-                            </TouchableOpacity>
+                            <Avatar profile={{ data: item }} style={styles.avatar} />
                             <View style={styles.orderInfo}>
                                 <Text style={styles.srcName}>{item.Name}</Text>
                                 <View style={styles.dateCont}>
@@ -368,88 +430,151 @@ export default () => {
                                 </View>
                             </View>
                             <View style={styles.approvalBtnsCont}>
-                                {data?.restaurant &&
-                                    (item.accepted === undefined ? (
-                                        <>
-                                            <TouchableOpacity
-                                                style={[
-                                                    styles.approvalBtn,
-                                                    { backgroundColor: "#dd4c35", marginLeft: 0 },
-                                                ]}
-                                                underlayColor="transparent"
-                                                onPress={() =>
-                                                    Approval(false, item.id, item.key, item.postId)
-                                                }
-                                            >
-                                                <Ionicons name="close-outline" size={25} color="#fff" />
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                style={[styles.approvalBtn, { backgroundColor: "#0dbc79" }]}
-                                                underlayColor="transparent"
-                                                onPress={() => Approval(true, item.id, item.key, item.postId)}
-                                            >
-                                                <Ionicons name="checkmark-outline" size={25} color="#fff" />
-                                            </TouchableOpacity>
-                                        </>
-                                    ) : item.delievered ? (
-                                        <Ionicons name="checkmark-done-circle" size={30} color="#4bbc83" />
-                                    ) : item.accepted ? (
+                                {item.delievered ? (
+                                    <Animated.View style={isNew && AnimStyle}>
                                         <Ionicons name="checkmark-circle" size={30} color="#4bbc83" />
-                                    ) : (
+                                    </Animated.View>
+                                ) : item.accepted ? (
+                                    <Animated.View style={isNew && AnimStyle}>
+                                        <Ionicons name="checkmark" size={25} color="#4bbc83" />
+                                    </Animated.View>
+                                ) : (
+                                    <Animated.View style={isNew && AnimStyle}>
                                         <Ionicons name="close-circle" size={30} color="#ef4d4d" />
-                                    ))}
-
-                                {!data?.restaurant &&
-                                    (item.delievered ? (
-                                        <Ionicons name="checkmark-done-circle" size={30} color="#4bbc83" />
-                                    ) : item.accepted ? (
-                                        <Ionicons name="checkmark-circle" size={30} color="#4bbc83" />
-                                    ) : (
-                                        <Ionicons name="close-circle" size={30} color="#ef4d4d" />
-                                    ))}
+                                    </Animated.View>
+                                )}
                             </View>
                         </View>
-                        {item.accepted &&
-                            !item.delievered &&
-                            (data?.restaurant ? (
-                                <TouchableOpacity
-                                    style={styles.orderFooter}
-                                    onPress={() => {
-                                        Submit_Order(item.key, item.id, item.postId);
-                                    }}
-                                >
-                                    <Text
-                                        style={{
-                                            fontSize: 16,
-                                            fontWeight: "bold",
-                                            color: "#fff",
-                                            marginRight: 7,
-                                        }}
-                                    >
-                                        {CONTENT.notfSubmit}
-                                    </Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <TouchableOpacity
-                                    style={styles.orderFooter}
+                        {item.accepted && !item.delievered && (
+                            <View style={{ flexDirection: "row" }}>
+                                <TouchableHighlight
+                                    style={[styles.orderFooter, { backgroundColor: "transparent" }]}
                                     onPress={() => {
                                         GetDirections(item.id);
                                     }}
+                                    underlayColor="#0027584d"
                                 >
-                                    <Text
-                                        style={{
-                                            fontSize: 16,
-                                            fontWeight: "bold",
-                                            color: "#fff",
-                                            marginRight: 7,
-                                        }}
-                                    >
-                                        {CONTENT.notfDirections}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                        <Ionicons name="navigate" size={15} color="#1785f5" />
+                                        <Text
+                                            style={{
+                                                color: "#1785f5",
+                                                marginLeft: 4,
+                                            }}
+                                        >
+                                            {CONTENT.notfDirections}
+                                        </Text>
+                                    </View>
+                                </TouchableHighlight>
+
+                                <TouchableHighlight
+                                    style={[styles.orderFooter, { backgroundColor: "transparent" }]}
+                                    underlayColor="#0027584d"
+                                    onPress={() => Call(item.phone)}
+                                >
+                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                        <Ionicons name="call-outline" size={15} color="#00d781" />
+                                        <Text style={{ color: "#00d781", marginLeft: 4 }}>Call</Text>
+                                    </View>
+                                </TouchableHighlight>
+                            </View>
+                        )}
                     </View>
                 </View>
+            );
+        };
+        const renderRestaurantItems = ({ item }) => {
+            const isNew = newOrders.find((New) => (New.key === item.key ? true : false));
+            return (
+                <View style={styles.OrdersCont}>
+                    <View style={styles.order}>
+                        <View style={styles.content}>
+                            <Avatar profile={{ data: item }} style={styles.avatar} />
+                            <View style={styles.orderInfo}>
+                                <Text style={styles.srcName}>{item.Name}</Text>
+                                <View style={styles.dateCont}>
+                                    <Ionicons name="time-outline" size={12} color="#848484" />
+                                    <Text style={styles.date}>{item.elapsed}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.approvalBtnsCont}>
+                                {item.accepted === undefined ? (
+                                    <>
+                                        <TouchableOpacity
+                                            style={[
+                                                styles.approvalBtn,
+                                                { backgroundColor: "#dd4c35", marginLeft: 0 },
+                                            ]}
+                                            underlayColor="transparent"
+                                            onPress={() =>
+                                                Approval(false, item.Token, item.id, item.key, item.postId)
+                                            }
+                                        >
+                                            <Animated.View style={isNew && AnimStyle}>
+                                                <Ionicons name="close-outline" size={25} color="#fff" />
+                                            </Animated.View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={[styles.approvalBtn, { backgroundColor: "#0dbc79" }]}
+                                            underlayColor="transparent"
+                                            onPress={() =>
+                                                Approval(true, item.Token, item.id, item.key, item.postId)
+                                            }
+                                        >
+                                            <Animated.View style={isNew && AnimStyle}>
+                                                <Ionicons name="checkmark-outline" size={25} color="#fff" />
+                                            </Animated.View>
+                                        </TouchableOpacity>
+                                    </>
+                                ) : item.delievered ? (
+                                    <Animated.View style={isNew && AnimStyle}>
+                                        <Ionicons name="checkmark-circle" size={30} color="#4bbc83" />
+                                    </Animated.View>
+                                ) : item.accepted ? (
+                                    <Animated.View style={isNew && AnimStyle}>
+                                        <Ionicons name="checkmark" size={25} color="#4bbc83" />
+                                    </Animated.View>
+                                ) : (
+                                    <Animated.View style={isNew && AnimStyle}>
+                                        <Ionicons name="close-circle" size={30} color="#ef4d4d" />
+                                    </Animated.View>
+                                )}
+                            </View>
+                        </View>
+                        {item.accepted && !item.delievered && (
+                            <TouchableOpacity
+                                style={styles.orderFooter}
+                                onPress={() => {
+                                    Submit_Order(item.key, item.id, item.postId);
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: 16,
+                                        fontWeight: "bold",
+                                        color: "#fff",
+                                        marginRight: 7,
+                                    }}
+                                >
+                                    {CONTENT.notfSubmit}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+            );
+        };
+        const Loading_Footer = () => {
+            return (
+                <Text
+                    style={{
+                        flex: 1,
+                        height: 50,
+                        textAlign: "center",
+                    }}
+                >
+                    <ActivityIndicator size={25} color="#1785f5" />
+                </Text>
             );
         };
         const renderEmptyList = () => {
@@ -457,7 +582,7 @@ export default () => {
                 return (
                     <View style={{ alignItems: "center", justifyContent: "center" }}>
                         <Image
-                            style={{ width: 100, height: 100, marginBottom: 10 }}
+                            style={{ width: 100, height: 100, marginBottom: 10, opacity: 0.7 }}
                             source={require("../../../assets/emptyMsg.png")}
                         />
                     </View>
@@ -471,6 +596,7 @@ export default () => {
             await Fetch();
             setRefreshing(false);
         };
+
         return (
             <View style={styles.Container}>
                 <ScreenHeader title={HeaderTitle} btns={HeaderButtons} />
@@ -480,16 +606,18 @@ export default () => {
                     <FlatList
                         style={styles.OrdersView}
                         data={Orders}
-                        renderItem={renderItem}
+                        renderItem={data?.restaurant ? renderRestaurantItems : renderUserItems}
                         keyExtractor={(item) => item.key}
-                        onEndReached={Fetch_More}
+                        onEndReached={Orders.length && Fetch_More}
                         onEndReachedThreshold={0.5}
                         showsVerticalScrollIndicator={false}
+                        ListFooterComponent={loadingFooter ? Loading_Footer : <View style={{ height: 20 }} />}
+                        scrollEventThrottle={16}
                         refreshControl={
                             <RefreshControl
                                 colors={["#1785f5"]}
-                                progressBackgroundColor={theme ? "#001837" : "#ffffff"}
-                                progressViewOffset={30}
+                                progressBackgroundColor={theme ? "#021f46" : "#ffffff"}
+                                progressViewOffset={0} // 30
                                 refreshing={refreshing}
                                 onRefresh={onRefresh}
                             />
@@ -504,11 +632,28 @@ export default () => {
                 )}
             </View>
         );
+    });
+
+    const config = {
+        animation: "timing",
+        config: {
+            duration: 200,
+        },
     };
 
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false, presentation: "transparentModal" }}>
-            <Stack.Screen name="Main" component={__FLATLIST_NOTS__} />
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false,
+                detachPreviousScreen: false,
+                transitionSpec: {
+                    open: config,
+                    close: config,
+                },
+                cardStyleInterpolator: CardStyleInterpolators.forFadeFromBottomAndroid,
+            }}
+        >
+            <Stack.Screen name="MAIN" component={MAIN} />
             <Stack.Screen name="OpenProfile" component={OpenProfile} />
         </Stack.Navigator>
     );

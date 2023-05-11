@@ -1,17 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { TouchableOpacity, View, Text } from "react-native";
 import styles from "./styles";
 import AccountType from "./AccountType/AccountType";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
-import { createStackNavigator } from "@react-navigation/stack";
 import Translations from "../../Languages";
+import { Image } from "react-native";
 
 export default () => {
     const Styles = styles();
     const { theme } = useSelector((state) => state.user);
-
-    const Stack = createStackNavigator();
+    const [accType, setAccType] = useState({ rest: null });
 
     const CONTENT = {
         metadataTitle: Translations().t("metadataTitle"),
@@ -21,7 +20,7 @@ export default () => {
         metadataUser: Translations().t("metadataUser"),
     };
 
-    const MAIN = ({ navigation }) => {
+    const MAIN = () => {
         return (
             <View style={Styles.container}>
                 <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -32,18 +31,18 @@ export default () => {
                     </View>
 
                     <View style={Styles.wrapper}>
-                        <TouchableOpacity
-                            style={Styles.option}
-                            onPress={() => navigation.replace("accType", { rest: true })}
-                        >
-                            <Ionicons name="restaurant" size={90} color={theme ? "#fff" : "#6a6a6a"} />
+                        <TouchableOpacity style={Styles.option} onPress={() => setAccType({ rest: true })}>
+                            <Image
+                                style={{ width: 90, height: 90 }}
+                                source={require("../../../assets/rest.png")}
+                            />
                             <Text style={Styles.optTxt}>{CONTENT.metadataRest}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={Styles.option}
-                            onPress={() => navigation.replace("accType", { rest: false })}
-                        >
-                            <Ionicons name="person" size={90} color={theme ? "#fff" : "#6a6a6a"} />
+                        <TouchableOpacity style={Styles.option} onPress={() => setAccType({ rest: false })}>
+                            <Image
+                                style={{ width: 90, height: 90 }}
+                                source={require("../../../assets/user.png")}
+                            />
                             <Text style={Styles.optTxt}>{CONTENT.metadataUser}</Text>
                         </TouchableOpacity>
                     </View>
@@ -52,13 +51,5 @@ export default () => {
         );
     };
 
-    return (
-        <Stack.Navigator
-            initialRouteName="Main"
-            screenOptions={{ headerShown: false, animationEnabled: false }}
-        >
-            <Stack.Screen name="Main" component={MAIN} />
-            <Stack.Screen name="accType" component={AccountType} />
-        </Stack.Navigator>
-    );
+    return accType.rest === null ? <MAIN /> : <AccountType rest={accType.rest} />;
 };

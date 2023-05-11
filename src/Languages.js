@@ -9,29 +9,27 @@ const Translations = () => {
         ar: {
             greeting: "مرحباً",
             greetingDesc:
-                "احنا بنسعى لتقليل التلوث اللي بتسببه المواد الغذائية المتبقية من المطاعم و الحد من إهدارها, ",
-            greetingDescJoin: "إنضم لينا",
+                "نحن نسعى لتقليل التلوث التي تسببه المواد الغذائية المتبقية من المطاعم و الحد من إهدارها, ",
+            greetingDescJoin: "إنضم إلينا",
             greetingSignIn: "تسجيل الدخول",
             greetingSignUp: "إنشاء حساب",
 
-            signinTitle: "أهلاً بيك تاني!",
-            signinDesc: "يلا نسجل الدخول لحسابك",
+            signinTitle: "أهلاً بك مجدداً !",
+            signinDesc: "هيا نسجل الدخول لحسابك",
             Email: "البريد الإلكتروني",
             Pass: "كلمة السر",
             signinBtn: "دخول",
-            signinCreateAcc: "لسه معندكش حساب؟",
+            signinCreateAcc: "لا تمتلك حساب؟",
             signinForgotPass: "نسيت كلمة السر؟",
             Or: "أو",
 
             resetpassTitle: "إعادة تعيين كلمة السر",
-            resetpassDesc:
-                "Enter your email that you used to register, We'll send you an email with a link toreset your password.",
             resetpassDesc: "ادخل البريد الالكتروني للحساب الذي نسيت كلمة السر الخاصة به",
             resetpassEmail: "البريد الالكتروني",
             resetpassSend: "ارسل",
 
             signupTitle: "إنشاء حساب",
-            signupDesc: "يلا نعمل حساب جديد.",
+            signupDesc: "دعنا ننشأ لك حساب جديد.",
             signupRepass: "تأكيد كلمة السر",
             signupBtn: "إنشاء حساب",
             signupCreateAcc: "عندك حساب بالفعل؟",
@@ -44,15 +42,15 @@ const Translations = () => {
 
             acctyperestTitle: "حساب مطعم",
             acctyperestLocation: "حدد موقع المطعم",
-            acctyperestAddress: "عنوان المطعم ?",
+            acctyperestAddress: "ادخل عنوان المطعم",
 
             acctypeuserTitle: "حساب مستخدم",
             acctypeuserLocation: "حدد موقعك",
-            acctypeuserAddress: "ادخل عنوانك ?",
+            acctypeuserAddress: "ادخل عنوانك",
 
             acctypeName: "اسم الحساب",
             acctypePhone: "رقم الهاتف",
-            acctypeSendCode: "أرسل الكود",
+            acctypeSendCode: "ارسل الكود",
             acctypeResend: "إعادة ارسال",
             acctypeCode: "كود التحقق",
             acctypeVcode: "تأكيد",
@@ -60,9 +58,32 @@ const Translations = () => {
 
             mapBtn: "تأكيد",
 
-            homeTitle: "اكتشف",
-            homeEmptyPosts: "المطاعم مغلقة الأن عد لاحقاً",
-            homePickAt: "احصل عليها اليوم:",
+            exploreTitle: "اكتشف",
+            exploreEmptyPosts: "المطاعم مغلقة الأن عد لاحقاً",
+
+            dashboardTitle: "لوحة التحكم",
+            dashboardActivePost: "المنشور النشط",
+            dashboardActivePostId: "معرف المنشور",
+            dashboardActivePostCreatedAt: "تاريخ النشر",
+            ExpiresIn: "ينتهي في",
+            dashboardActivePostDetails: "تفاصيل",
+            dashboardActivePostDelete: "حذف",
+            dashboardStatsticsToday: "اليوم",
+            dashboardStatsticsWeek: "هذا الأسبوع",
+            dashboardStatsticsTotal: "الإجمالي",
+            dashboardStatsticsDeliverd: "تم التسليم",
+            dashboardStatsticsCancled: "تم الرفض",
+            dashboardStatsticsPosts: "منشورات",
+            dashboardStatsticsOrders: "طلبات",
+            todayPosts: "منشورات اليوم",
+            weekPosts: "منشورات الأسبوع",
+            totlaPosts: "إجمالي المنشورات",
+            deliverdOrders: "طلبات سلمت",
+            cancledOrders: "طلبات رفضت",
+
+            dashboardPosts: "المنشورات",
+
+            postPickAt: "احصل عليها اليوم:",
             Now: "الأن",
             flheaderAvl: "متاح",
             flheaderRec: "الأقرب لك",
@@ -90,6 +111,10 @@ const Translations = () => {
             profUpdate: "تحديث",
 
             searchBar: "بحث",
+            searchFound: "تم العثور على",
+            searchResult: "نتيجة",
+            serachFood: "طعام",
+            searchResaurant: "مطعم",
 
             favsTitle: "المفضلة",
 
@@ -99,6 +124,10 @@ const Translations = () => {
             postFoodContains: "اوصف محتويات الطعام",
             postClosedTime: "متى يغلق المطعم ؟",
             postCreateBtn: "إنشاء",
+
+            confPhotoTitle: "صورة تأكيدية",
+            confPhotoDesc: "نحتاج منك ان تلتقط صورة لاخر طلب استلمته للتأكد من وصول الطعام للجهة المستهدفة",
+            confPhotoNote: "تنويه: تأكد من ظهور الطعام والحيوان في الصورة بوضوح",
 
             noconnectionTitle: "لا يوجد اتصال بالانترنت",
             noconnectionTrySteps: "جرب تلك الخطوات لمعاودة الاتصال:",
@@ -159,9 +188,29 @@ const Translations = () => {
 
             mapBtn: "Confirm",
 
-            homeTitle: "Explore",
-            homeEmptyPosts: "Restaurants are closed now",
-            homePickAt: "Pick up today:",
+            dashboardTitle: "Dashboard",
+            dashboardActivePost: "Active Post",
+            dashboardActivePostId: "Post Id",
+            dashboardActivePostCreatedAt: "Created In",
+            ExpiresIn: "Expires In",
+            dashboardActivePostDetails: "Details",
+            dashboardActivePostDelete: "Delete",
+            dashboardStatsticsToday: "Todays",
+            dashboardStatsticsWeek: "This Week",
+            dashboardStatsticsTotal: "Total",
+            dashboardStatsticsDeliverd: "Deliverd",
+            dashboardStatsticsCancled: "Cancled",
+            dashboardStatsticsPosts: "Posts",
+            dashboardStatsticsOrders: "Orders",
+            todayPosts: "Today Posts",
+            weekPosts: "Week Posts",
+            totlaPosts: "Total Posts",
+            deliverdOrders: "Deliverd Orders",
+            cancledOrders: "Cancled Orders",
+
+            exploreTitle: "Explore",
+            exploreEmptyPosts: "Restaurants are closed now",
+            postPickAt: "Pick up today:",
             Now: "Just now",
             flheaderAvl: "Available",
             flheaderRec: "Recommended for you",
@@ -189,6 +238,10 @@ const Translations = () => {
             profUpdate: "Update",
 
             searchBar: "Search",
+            searchFound: "Found",
+            searchResult: "result",
+            serachFood: "Food",
+            searchResaurant: "Restaurant",
 
             favsTitle: "Favorites",
 
@@ -198,6 +251,11 @@ const Translations = () => {
             postFoodContains: "What this food contain ?",
             postClosedTime: "Choose Closed Time",
             postCreateBtn: "Create",
+
+            confPhotoTitle: "Confirmation Photo",
+            confPhotoDesc:
+                "We want you to take a confirmation photo of your last order, to make sure the food reaches the target destination.",
+            confPhotoNote: "Note: make sure the photo is clear and the animal with the food appear well",
 
             noconnectionTitle: "No Internet connection",
             noconnectionTrySteps: "Try these steps to get back online:",

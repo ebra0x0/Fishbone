@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity, Image, ScrollView, ActivityIndicator, Linking } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
+import { View, Text, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import mapStyle from "../../Components/Map/mapStyle";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,26 +7,47 @@ import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import GetDirections from "../../Components/GetDirections";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./styles";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Avatar from "../../Components/Avatar/Avatar";
 
-const OpenProfile = ({ navigation, route }) => {
+const OpenProfile = ({ route }) => {
     const Styles = styles();
     const { data, theme, favorites } = useSelector((state) => state.user);
     const Data = route.params;
     const [isFav, setIsFav] = useState(null);
+    const scale = useSharedValue(1);
+
+    const AnimStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ scale: scale.value }],
+        };
+    });
 
     const dispatch = useDispatch();
 
     useEffect(() => {
         Fav_Detector(Data.id);
     }, []);
+    useEffect(() => {
+        if (isFav) {
+            scale.value = withSpring(0.7, {}, (end) => {
+                if (end) {
+                    scale.value = withSpring(1, { mass: 0.4, damping: 2 });
+                }
+            });
+        }
+    }, [isFav]);
 
     const Fav_Detector = (source) => {
         if (favorites.length) {
+            let done = false;
+
             favorites.forEach((fav, indx) => {
                 if (fav.id === source) {
                     setIsFav(true);
-                } else {
-                    indx + 1 == favorites.length && isFav == null && setIsFav(false);
+                    done = true;
+                } else if (!done && indx + 1 === favorites.length) {
+                    setIsFav(false);
                 }
             });
         } else {
@@ -40,22 +61,18 @@ const OpenProfile = ({ navigation, route }) => {
                 fav: isFav,
             };
             if (isFav) {
-                const newFavs = [];
-                favorites.forEach((fav) => {
-                    if (fav.id !== Data.id) {
-                        newFavs.push(fav);
-                    } else {
-                        dispatch({ type: "userData/Del_Favorites", payload: [fav] });
-                        dispatch({ type: "userData/Set_Favorites", payload: newFavs });
-                        setIsFav(false);
-                    }
-                });
+                setIsFav(false);
+                const targetFav = favorites.find((fav) => fav.id === Data.id);
+                const newFavs = favorites.filter((fav) => fav.id !== Data.id);
+
+                dispatch({ type: "userData/Del_Favorites", payload: [targetFav] });
+                dispatch({ type: "userData/Set_Favorites", payload: newFavs });
             } else {
                 const favReq = {
-                    id: rest.id,
+                    id: Data.id,
                 };
-                dispatch({ type: "userData/Update_Favorites", payload: [favReq] });
                 setIsFav(true);
+                dispatch({ type: "userData/Update_Favorites", payload: [favReq] });
                 if (favorites.length) {
                     dispatch({ type: "userData/Set_Favorites", payload: [...favorites, favData] });
                 } else {
@@ -94,26 +111,13 @@ const OpenProfile = ({ navigation, route }) => {
         Linking.openURL(`mailto:${email}`);
     };
 
-    const HeaderTitle = (
-        <Text
-            style={{
-                flex: 1,
-                marginLeft: 6,
-                fontSize: 30,
-                color: theme ? "#fff" : "#252525",
-                fontWeight: "bold",
-            }}
-        >
-            {Data.Name}
-        </Text>
-    );
     const Buttons = [
         {
-            show: !data?.restaurant ? true : false,
+            show: !data?.restaurant,
             key: 1,
             name: isFav ? "heart" : "heart-outline",
             size: 30,
-            color: isFav ? "#0dbc79" : theme ? "#fff" : "#252525",
+            color: "#FF2763",
             fun: Toggle_Fav,
         },
     ];
@@ -121,173 +125,154 @@ const OpenProfile = ({ navigation, route }) => {
     const HeaderButtons = Buttons.map((btn) => {
         if (btn.show) {
             return (
-                <TouchableOpacity style={{ marginLeft: 15 }} key={btn.key} onPress={() => btn.fun()}>
-                    <Ionicons name={btn.name} size={btn.size} color={btn.color} />
-                </TouchableOpacity>
+                <Animated.View key={btn.key} style={[{ marginLeft: 15 }, AnimStyle]}>
+                    <TouchableOpacity onPress={() => btn.fun()}>
+                        <Ionicons name={btn.name} size={btn.size} color={btn.color} />
+                    </TouchableOpacity>
+                </Animated.View>
             );
         }
     });
 
     return (
         <View style={Styles.container}>
-            {isFav !== null && (
-                <ScreenHeader arrow={() => navigation.goBack()} title={HeaderTitle} btns={HeaderButtons} />
-            )}
+            <ScreenHeader arrow={true} title={Data.Name} btns={HeaderButtons} />
 
-            <ScrollView>
+            <View
+                style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: 200,
+                }}
+            >
+                <Avatar profile={{ data: { photo: Data.photo } }} style={Styles.avatar} disabled={true} />
+            </View>
+
+            <View style={Styles.wrapper}>
+                <TouchableOpacity style={Styles.row} onPress={() => GetDirections(Data?.id)}>
+                    <Ionicons
+                        style={Styles.label}
+                        name="compass-outline"
+                        size={25}
+                        color={theme ? "#1f5eab" : "#1785f5"}
+                    />
+                    <Text style={Styles.txtRows} selectable={true}>
+                        {Data.address}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={Styles.row} onPress={() => openPhoneApp(Data?.phone)}>
+                    <Ionicons
+                        style={Styles.label}
+                        name="call-outline"
+                        size={23}
+                        color={theme ? "#1f5eab" : "#1785f5"}
+                    />
+                    <Text style={Styles.txtRows} selectable={true}>
+                        {Data.phone}
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={Styles.row} onPress={() => openMailApp(Data?.email)}>
+                    <Ionicons
+                        style={Styles.label}
+                        name="mail-outline"
+                        size={23}
+                        color={theme ? "#1f5eab" : "#1785f5"}
+                    />
+                    <Text style={Styles.txtRows} selectable={true}>
+                        {Data.email}
+                    </Text>
+                </TouchableOpacity>
+
                 <View
                     style={{
-                        justifyContent: "center",
-                        alignItems: "center",
+                        marginVertical: 30,
+                        borderRadius: 10,
+                        overflow: "hidden",
                     }}
                 >
-                    {Data.photo ? (
-                        <Image style={Styles.avatar} source={{ uri: Data.photo }} />
+                    {Data.location ? (
+                        <MapView
+                            style={{ height: 140, backgroundColor: "#1e1e1e" }}
+                            region={Data.location}
+                            provider={PROVIDER_GOOGLE}
+                            customMapStyle={mapStyle}
+                        >
+                            <Marker coordinate={Data.location}>
+                                <Ionicons name="location" size={50} color="#18ad79" />
+                            </Marker>
+                        </MapView>
                     ) : (
-                        <View style={Styles.avatar}>
-                            <Ionicons name="person" size={60} color="#cfcfcf" />
+                        <View style={Styles.mapView}>
+                            <ActivityIndicator size={50} color="#1785f5" />
                         </View>
                     )}
+                    <TouchableOpacity
+                        style={{
+                            position: "absolute",
+                            bottom: 6,
+                            right: 6,
+                            backgroundColor: "#eee",
+                            padding: 5,
+                            borderRadius: 4,
+                        }}
+                        activeOpacity={0.8}
+                        onPress={() => GetDirections(Data.id)}
+                    >
+                        <Ionicons name="arrow-redo" size={20} color="#1e1e1e" />
+                    </TouchableOpacity>
                 </View>
-
-                <View style={Styles.wrapper}>
-                    <TouchableOpacity style={Styles.row} onPress={() => GetDirections(Data?.id)}>
-                        <Ionicons
-                            style={Styles.label}
-                            name="compass-outline"
-                            size={25}
-                            color={theme ? "#1f5eab" : "#1785f5"}
-                        />
-                        <Text style={Styles.txtRows} selectable={true}>
-                            {Data.address}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={Styles.row} onPress={() => openPhoneApp(Data?.phone)}>
-                        <Ionicons
-                            style={Styles.label}
-                            name="call-outline"
-                            size={23}
-                            color={theme ? "#1f5eab" : "#1785f5"}
-                        />
-                        <Text style={Styles.txtRows} selectable={true}>
-                            {Data.phone}
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={Styles.row} onPress={() => openMailApp(Data?.email)}>
-                        <Ionicons
-                            style={Styles.label}
-                            name="mail-outline"
-                            size={23}
-                            color={theme ? "#1f5eab" : "#1785f5"}
-                        />
-                        <Text style={Styles.txtRows} selectable={true}>
-                            {Data.email}
-                        </Text>
-                    </TouchableOpacity>
-
+                {Data.social && (
                     <View
                         style={{
-                            marginVertical: 30,
-                            borderRadius: 10,
-                            overflow: "hidden",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            paddingHorizontal: 70,
+                            height: 30,
                         }}
                     >
-                        {Data.location ? (
-                            <MapView
-                                style={{ height: 140, backgroundColor: "#1e1e1e" }}
-                                region={Data.location}
-                                provider={PROVIDER_GOOGLE}
-                                customMapStyle={mapStyle}
+                        {Data?.social.fb && (
+                            <TouchableOpacity
+                                style={{ flex: 1, alignItems: "center" }}
+                                onPress={() => Open_Social("fb")}
                             >
-                                <Marker coordinate={Data.location}>
-                                    <Ionicons name="location" size={50} color="#18ad79" />
-                                </Marker>
-                            </MapView>
-                        ) : (
-                            <View style={Styles.mapView}>
-                                <ActivityIndicator size={50} color="#1785f5" />
-                            </View>
+                                <Ionicons name="logo-facebook" size={25} color={theme ? "#fff" : "#3e3e3e"} />
+                            </TouchableOpacity>
                         )}
-                        <TouchableOpacity
-                            style={{
-                                position: "absolute",
-                                bottom: 6,
-                                right: 6,
-                                backgroundColor: "#eee",
-                                padding: 5,
-                                borderRadius: 4,
-                            }}
-                            activeOpacity={0.8}
-                            onPress={() => GetDirections(Data.id)}
-                        >
-                            <Ionicons name="arrow-redo" size={20} color="#1e1e1e" />
-                        </TouchableOpacity>
-                    </View>
-                    {Data.social && (
-                        <View
-                            style={{
-                                flexDirection: "row",
-                                alignItems: "center",
-                                paddingHorizontal: 70,
-                                height: 30,
-                            }}
-                        >
-                            {Data?.social.fb && (
-                                <TouchableOpacity
-                                    style={{ flex: 1, alignItems: "center" }}
-                                    onPress={() => Open_Social("fb")}
-                                >
-                                    <Ionicons
-                                        name="logo-facebook"
-                                        size={25}
-                                        color={theme ? "#fff" : "#3e3e3e"}
-                                    />
-                                </TouchableOpacity>
-                            )}
-                            {Data?.social.tw && (
-                                <TouchableOpacity
-                                    style={{ flex: 1, alignItems: "center" }}
-                                    onPress={() => Open_Social("tw")}
-                                >
-                                    <Ionicons
-                                        name="logo-twitter"
-                                        size={25}
-                                        color={theme ? "#fff" : "#3e3e3e"}
-                                    />
-                                </TouchableOpacity>
-                            )}
-                            {Data?.social.inst && (
-                                <TouchableOpacity
-                                    style={{ flex: 1, alignItems: "center" }}
-                                    onPress={() => Open_Social("inst")}
-                                >
-                                    <Ionicons
-                                        name="logo-instagram"
-                                        size={25}
-                                        color={theme ? "#fff" : "#3e3e3e"}
-                                    />
-                                </TouchableOpacity>
-                            )}
+                        {Data?.social.tw && (
+                            <TouchableOpacity
+                                style={{ flex: 1, alignItems: "center" }}
+                                onPress={() => Open_Social("tw")}
+                            >
+                                <Ionicons name="logo-twitter" size={25} color={theme ? "#fff" : "#3e3e3e"} />
+                            </TouchableOpacity>
+                        )}
+                        {Data?.social.inst && (
+                            <TouchableOpacity
+                                style={{ flex: 1, alignItems: "center" }}
+                                onPress={() => Open_Social("inst")}
+                            >
+                                <Ionicons
+                                    name="logo-instagram"
+                                    size={25}
+                                    color={theme ? "#fff" : "#3e3e3e"}
+                                />
+                            </TouchableOpacity>
+                        )}
 
-                            {Data?.social.web && (
-                                <TouchableOpacity
-                                    style={{ flex: 1, alignItems: "center" }}
-                                    onPress={() => Open_Social("web")}
-                                >
-                                    <Ionicons
-                                        name="globe-outline"
-                                        size={25}
-                                        color={theme ? "#fff" : "#3e3e3e"}
-                                    />
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    )}
-                </View>
-            </ScrollView>
+                        {Data?.social.web && (
+                            <TouchableOpacity
+                                style={{ flex: 1, alignItems: "center" }}
+                                onPress={() => Open_Social("web")}
+                            >
+                                <Ionicons name="globe-outline" size={25} color={theme ? "#fff" : "#3e3e3e"} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                )}
+            </View>
         </View>
     );
 };
 
-export default OpenProfile;
+export default memo(OpenProfile);

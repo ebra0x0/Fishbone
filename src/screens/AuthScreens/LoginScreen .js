@@ -225,7 +225,7 @@ export default () => {
                             <MaterialIcons
                                 name={hidePass ? "visibility" : "visibility-off"}
                                 size={25}
-                                color={hidePass ? (theme ? "#00408e" : "#e2e2e2") : "#1785f5"}
+                                color={hidePass ? (theme ? "#00408e" : "#b9b9b9") : "#1785f5"}
                             />
                         </TouchableOpacity>
                     </View>
@@ -233,8 +233,16 @@ export default () => {
                         <Text style={{ color: "#ff4a4a", fontSize: 12 }}>{password.error}</Text>
                     )}
 
-                    <TouchableOpacity style={{ width: 160 }} onPress={() => navigation.navigate("resetPass")}>
-                        <Text style={{ fontSize: 16, color: "#1785f5", marginRight: 7 }}>
+                    <TouchableOpacity
+                        style={{ width: 180, alignSelf: lang === "ar" ? "flex-end" : "flex-start" }}
+                        onPress={() => navigation.navigate("resetPass")}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                color: "#1785f5",
+                            }}
+                        >
                             {Translations().t("signinForgotPass")}
                         </Text>
                     </TouchableOpacity>
@@ -292,7 +300,7 @@ export default () => {
 
     return (
         <Stack.Navigator screenOptions={{ headerShown: false, presentation: "modal" }}>
-            <Stack.Screen name="Main" component={MAIN} />
+            <Stack.Screen name="MAIN" component={MAIN} />
             <Stack.Screen name="resetPass" component={Reset_Pass} />
         </Stack.Navigator>
     );

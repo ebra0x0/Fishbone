@@ -114,7 +114,7 @@ export default ({ navigation }) => {
                         </Text>
                     </Text>
                 </View>
-                <View style={{ marginHorizontal: 15, alignItems: "center", flexDirection: "row" }}>
+                <View style={{ marginHorizontal: 15, alignItems: "center", flexDirection: "row", gap: 20 }}>
                     <TouchableOpacity style={styles.button} onPress={() => navigation.replace("Login")}>
                         <Text style={{ fontSize: 17, fontWeight: "bold", color: "#fff" }}>
                             {Translations().t("greetingSignIn")}

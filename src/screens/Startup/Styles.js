@@ -27,7 +27,6 @@ const Styles = () => {
             borderRadius: 20,
             justifyContent: "center",
             alignItems: "center",
-            marginHorizontal: 6,
         },
     });
 };

@@ -6,7 +6,7 @@ import { View, TouchableOpacity, Text, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
-import ALert from "../Alert/Alert";
+import TOAST from "../Toast/Toast";
 import { Toast } from "native-base";
 import Translations from "../../Languages";
 
@@ -51,7 +51,7 @@ const Map = (props) => {
                     Toast.show({
                         render: () => {
                             return (
-                                <ALert
+                                <TOAST
                                     status="error"
                                     msg="Make sure you enabled location permission from app settings"
                                 />

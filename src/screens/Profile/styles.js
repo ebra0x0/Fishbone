@@ -8,15 +8,20 @@ const styles = () => {
         Container: {
             flex: 1,
             backgroundColor: Root.CONTAINER,
-            paddingBottom: 50,
         },
         avatarCont: {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#000000",
             overflow: "hidden",
-            height: 250,
+            height: 270,
+            borderBottomRightRadius: 20,
+            borderBottomLeftRadius: 20,
+        },
+        avatar: {
+            width: 120,
+            height: 120,
+            borderRadius: 120 / 2,
         },
         titleName: {
             marginTop: 5,
@@ -25,7 +30,7 @@ const styles = () => {
             marginLeft: 4,
         },
         formContainer: {
-            paddingTop: 30,
+            paddingTop: 20,
             paddingHorizontal: 30,
         },
         input: {
