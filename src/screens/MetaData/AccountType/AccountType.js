@@ -120,7 +120,7 @@ const AccountType = (props) => {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={Styles.avatarCont}>
-                        <Avatar style={Styles.avatar} upload={false} disabled={loading} />
+                        <Avatar style={Styles.avatar} upload={true} disabled={loading} />
                     </View>
                     <View style={{ height: 450 }}>
                         <TouchableOpacity
@@ -141,7 +141,7 @@ const AccountType = (props) => {
                                 style={[Styles.row, Styles.input]}
                                 placeholder={CONTENT.acctypeName}
                                 placeholderTextColor="#7a7a7a"
-                                textAlign="right"
+                                textAlign={lang === "en" ? "left" : "right"}
                                 maxLength={20}
                                 editable={!loading}
                                 value={fullName.value}
@@ -186,7 +186,7 @@ const AccountType = (props) => {
                                 value={address.value}
                                 placeholder={rest ? CONTENT.acctyperestAddress : CONTENT.acctypeuserAddress}
                                 placeholderTextColor="#7a7a7a"
-                                textAlign="right"
+                                textAlign={lang === "en" ? "left" : "right"}
                                 maxLength={60}
                                 editable={!loading}
                                 onChangeText={(txt) => {

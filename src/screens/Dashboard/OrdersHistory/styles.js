@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import RootColor from "../../RootColor";
+import RootColor from "../../../RootColor";
 import { useSelector } from "react-redux";
 
 const styles = () => {

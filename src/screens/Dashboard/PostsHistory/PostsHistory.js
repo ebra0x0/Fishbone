@@ -1,7 +1,7 @@
 import React, { useEffect, useState, memo } from "react";
 import { View, Text, FlatList, Image } from "react-native";
 import styles from "./styles";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
+import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
 
 const PostsHistory = ({ route }) => {
     const [posts, setPosts] = useState(route.params.posts);

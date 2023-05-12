@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, memo } from "react";
 import {
     View,
     Text,
@@ -16,12 +16,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "./styles";
 import Translations from "../../Languages";
-import PostsHistory from "../PostsHistory/PostsHistory";
-import CreatePost from "../CreatePost/CreatePost";
+import CreatePost from "./CreatePost/CreatePost";
 import TOAST from "../../Components/Toast/Toast";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import PostInfo from "../PostInfo/PostInfo";
-import OrdersHistory from "../OrdersHistory/OrdersHistory";
+import PostsHistory from "./PostsHistory/PostsHistory";
+import OrdersHistory from "./OrdersHistory/OrdersHistory";
 import OpenProfile from "../OpenProfile/OpenProfile";
 import Check_Post_Expired from "../../Components/CheckPostExpired";
 
@@ -93,7 +93,7 @@ const Dashboard = () => {
             const Id = userPost.key?.slice(0, 6).toUpperCase();
             const From = new Date(userPost.date.toDate()).toDateString();
             const To = new Date(userPost.closedIn).toDateString();
-            setActivePost({ id: Id, from: From, to: To, Data: userPost });
+            setActivePost((prev) => ({ ...prev, id: Id, from: From, to: To, Data: userPost }));
         }
     }, [userPost]);
 
@@ -118,142 +118,156 @@ const Dashboard = () => {
     };
 
     const fetchActivePost = () => {
-        setLoading(true);
-        $User_Ref
-            .collection("posts")
-            .where("active", "==", true)
-            .onSnapshot((query) => {
-                query?.size &&
-                    query.forEach(async (active) => {
-                        const { date, closedIn } = active.data();
-                        const isExpired = await Check_Post_Expired(active.id);
+        try {
+            setLoading((prev) => !prev);
+            $User_Ref
+                .collection("posts")
+                .where("active", "==", true)
+                .onSnapshot((query) => {
+                    query?.size &&
+                        query.forEach(async (active) => {
+                            const { date, closedIn } = active.data();
+                            const isExpired = await Check_Post_Expired(active.id);
 
-                        if (isExpired) {
-                            // Remove it from public
-                            $Posts_Ref.doc(active.id).delete();
-                            // Inactivate it from private
-                            active.ref.update({ active: false });
-                        } else {
-                            const Id = active.id.slice(0, 6).toUpperCase();
-                            const From = new Date(date?.toDate()).toDateString();
-                            const To = new Date(closedIn?.toDate()).toDateString();
+                            if (isExpired) {
+                                // Remove it from public
+                                $Posts_Ref.doc(active.id).delete();
+                                // Inactivate it from private
+                                active.ref.update({ active: false });
+                            } else {
+                                const Id = active.id.slice(0, 6).toUpperCase();
+                                const From = new Date(date?.toDate()).toDateString();
+                                const To = new Date(closedIn?.toDate()).toDateString();
 
-                            setActivePost({ id: Id, from: From || "", to: To || "", Data: active.data() });
-                        }
-                    });
-                setLoading(false);
-            });
+                                setActivePost((prev) => ({
+                                    ...prev,
+                                    id: Id,
+                                    from: From || "",
+                                    to: To || "",
+                                    Data: active.data(),
+                                }));
+                            }
+                        });
+                    setLoading((prev) => !prev);
+                });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const fetchStatistics = () => {
-        $User_Ref.collection("posts").onSnapshot((querySnapshot) => {
-            let Today = { count: 0, Data: [] };
-            let Weeks = { count: 0, Data: [] };
-            let Total = { count: querySnapshot?.size, Data: [] };
+        try {
+            $User_Ref.collection("posts").onSnapshot((querySnapshot) => {
+                let Today = { count: 0, Data: [] };
+                let Weeks = { count: 0, Data: [] };
+                let Total = { count: querySnapshot?.size, Data: [] };
 
-            querySnapshot?.size &&
-                querySnapshot.forEach((post, indx) => {
-                    const { date } = post.data();
-                    const Now = new Date();
-                    const Elapsed = parseInt((Now - new Date(date?.toDate())) / (1000 * 60 * 60 * 24));
+                querySnapshot?.size &&
+                    querySnapshot.forEach((post, indx) => {
+                        const { date } = post.data();
+                        const Now = new Date();
+                        const Elapsed = parseInt((Now - new Date(date?.toDate())) / (1000 * 60 * 60 * 24));
 
-                    Total.Data.push({ ...post.data(), key: indx });
-                    if (Elapsed <= 1) {
-                        Today = {
-                            count: Today.count + 1,
-                            Data: [...Today.Data, { ...post.data(), key: indx }],
-                        };
-                        Weeks = {
-                            count: Weeks.count + 1,
-                            Data: [...Weeks.Data, { ...post.data(), key: indx }],
-                        };
-                    } else if (Elapsed <= 7) {
-                        Weeks = {
-                            count: Weeks.count + 1,
-                            Data: [...Weeks.Data, { ...post.data(), key: indx }],
-                        };
-                    }
+                        Total.Data.push({ ...post.data(), key: indx });
+                        if (Elapsed <= 1) {
+                            Today = {
+                                count: Today.count + 1,
+                                Data: [...Today.Data, { ...post.data(), key: indx }],
+                            };
+                            Weeks = {
+                                count: Weeks.count + 1,
+                                Data: [...Weeks.Data, { ...post.data(), key: indx }],
+                            };
+                        } else if (Elapsed <= 7) {
+                            Weeks = {
+                                count: Weeks.count + 1,
+                                Data: [...Weeks.Data, { ...post.data(), key: indx }],
+                            };
+                        }
 
-                    if (indx + 1 === querySnapshot?.size) {
-                        setStatstics({ postT: Today, postW: Weeks, postTo: Total });
-                    }
-                });
-        });
+                        if (indx + 1 === querySnapshot?.size) {
+                            setStatstics((prev) => ({ ...prev, postT: Today, postW: Weeks, postTo: Total }));
+                        }
+                    });
+            });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const fetchOrders = () => {
-        $User_Ref
-            .collection("orders")
-            .where("delievered", "==", true)
-            .onSnapshot((querySnapshot) => {
-                let Done = { count: querySnapshot?.size, Data: [] };
+        try {
+            $User_Ref
+                .collection("orders")
+                .where("delievered", "==", true)
+                .onSnapshot((querySnapshot) => {
+                    let Done = { count: querySnapshot?.size, Data: [] };
 
-                querySnapshot?.size &&
-                    querySnapshot.forEach(async (order, indx) => {
-                        await $Users_Ref
-                            .doc(order.data().source)
-                            .get()
-                            .then((user) => {
-                                const { id, photo, Name, phone, address, location, email, social } =
-                                    user.data();
-                                Done = {
-                                    count: Done.count,
-                                    Data: [
-                                        ...Done.Data,
-                                        {
-                                            ...order.data(),
-                                            id,
-                                            photo,
-                                            Name,
-                                            phone,
-                                            address,
-                                            location,
-                                            email,
-                                            social,
-                                            key: indx,
-                                        },
-                                    ],
-                                };
-                            });
-                        if (Done.Data.length == indx + 1) {
-                            setOrders((prev) => {
-                                return { ...prev, done: Done };
-                            });
-                        }
-                    });
-            });
+                    querySnapshot?.size &&
+                        querySnapshot.forEach(async (order, indx) => {
+                            await $Users_Ref
+                                .doc(order.data().source)
+                                .get()
+                                .then((user) => {
+                                    const { id, photo, Name, phone, address, location, email, social } =
+                                        user.data();
+                                    Done = {
+                                        count: Done.count,
+                                        Data: [
+                                            ...Done.Data,
+                                            {
+                                                ...order.data(),
+                                                id,
+                                                photo,
+                                                Name,
+                                                phone,
+                                                address,
+                                                location,
+                                                email,
+                                                social,
+                                                key: indx,
+                                            },
+                                        ],
+                                    };
+                                });
+                            if (Done.Data.length == indx + 1) {
+                                setOrders((prev) => ({ ...prev, done: Done }));
+                            }
+                        });
+                });
 
-        $User_Ref
-            .collection("orders")
-            .where("accepted", "==", false)
-            .onSnapshot((querySnapshot) => {
-                let Canceled = { count: querySnapshot?.size, Data: [] };
+            $User_Ref
+                .collection("orders")
+                .where("accepted", "==", false)
+                .onSnapshot((querySnapshot) => {
+                    let Canceled = { count: querySnapshot?.size, Data: [] };
 
-                querySnapshot?.size &&
-                    querySnapshot.forEach(async (order, indx) => {
-                        await $Users_Ref
-                            .doc(order.data().source)
-                            .get()
-                            .then((user) => {
-                                const { photo, Name } = user.data();
+                    querySnapshot?.size &&
+                        querySnapshot.forEach(async (order, indx) => {
+                            await $Users_Ref
+                                .doc(order.data().source)
+                                .get()
+                                .then((user) => {
+                                    const { photo, Name } = user.data();
 
-                                Canceled = {
-                                    count: Canceled.count,
-                                    Data: [...Canceled.Data, { ...order.data(), photo, Name, key: indx }],
-                                };
-                            });
+                                    Canceled = {
+                                        count: Canceled.count,
+                                        Data: [...Canceled.Data, { ...order.data(), photo, Name, key: indx }],
+                                    };
+                                });
 
-                        if (Canceled.Data.length == indx + 1) {
-                            setOrders((prev) => {
-                                return { ...prev, cancled: Canceled };
-                            });
-                        }
-                    });
-            });
+                            if (Canceled.Data.length == indx + 1) {
+                                setOrders((prev) => ({ ...prev, cancled: Canceled }));
+                            }
+                        });
+                });
+        } catch (e) {
+            console.log(e);
+        }
     };
 
     const Remove_Post = async () => {
-        setBtnLoading(true);
+        setBtnLoading((prev) => !prev);
         await $Posts_Ref
             .where("id", "==", data?.id)
             .get()
@@ -273,19 +287,14 @@ const Dashboard = () => {
                 dispatch({
                     type: "userData/Del_User_Post",
                 });
-                setActivePost({
-                    id: "",
-                    from: "",
-                    to: "",
-                    Data: {},
-                });
+                setActivePost((prev) => ({ ...prev, id: "", from: "", to: "", Data: {} }));
             })
             .catch((e) => {
                 console.log(e);
-                setBtnLoading(false);
+                setBtnLoading((prev) => !prev);
             });
 
-        setBtnLoading(false);
+        setBtnLoading((prev) => !prev);
         Toast.show({
             render: () => {
                 return <TOAST status="error" msg="Post Removed" />;
@@ -339,7 +348,7 @@ const Dashboard = () => {
                     querySnapshot.forEach((post, indx) => {
                         const { date } = post.data();
 
-                        const elapsed = __Get_Elapsed__(date, true) / (1000 * 60 * 60 * 24);
+                        const elapsed = __Get_Elapsed__(date) / (1000 * 60 * 60 * 24);
 
                         elapsed < 1 && dayPosts++;
                         if (indx + 1 == querySnapshot?.size) {
@@ -354,7 +363,7 @@ const Dashboard = () => {
             });
     };
 
-    const MAIN = () => {
+    const MAIN = memo(() => {
         return (
             <View style={Styles.container}>
                 <ScreenHeader title={CONTENT.dashboardTitle} />
@@ -505,11 +514,9 @@ const Dashboard = () => {
                         underlayColor="#1785F5"
                         onPress={() =>
                             statstics.postTo.Data.length &&
-                            InteractionManager.runAfterInteractions(() => {
-                                navigation.navigate("PostsHistory", {
-                                    title: CONTENT.totlaPosts,
-                                    posts: statstics.postTo.Data,
-                                });
+                            navigation.navigate("PostsHistory", {
+                                title: CONTENT.totlaPosts,
+                                posts: statstics.postTo.Data,
                             })
                         }
                     >
@@ -577,7 +584,7 @@ const Dashboard = () => {
                 </Box>
             </View>
         );
-    };
+    });
     const config = {
         animation: "timing",
         config: {

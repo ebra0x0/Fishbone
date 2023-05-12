@@ -1,8 +1,8 @@
 import React, { useEffect, useState, memo } from "react";
 import { View, Text, FlatList } from "react-native";
 import styles from "./styles";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
-import Avatar from "../../Components/Avatar/Avatar";
+import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
+import Avatar from "../../../Components/Avatar/Avatar";
 
 const OrdersHistory = ({ route }) => {
     const [orders, setOrders] = useState(route.params.orders);

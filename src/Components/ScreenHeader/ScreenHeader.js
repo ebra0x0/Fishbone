@@ -5,7 +5,7 @@ import { TouchableOpacity, View, Text, Keyboard } from "react-native";
 import { useSelector } from "react-redux";
 const ScreenHeader = (props) => {
     const { theme } = useSelector((state) => state.user);
-    const { arrow, title, component, btns } = props;
+    const { arrow, title, component, btns, style } = props;
     const [Buttons, setButtons] = useState([]);
 
     const navigation = useNavigation();
@@ -35,6 +35,8 @@ const ScreenHeader = (props) => {
                 flexDirection: "row",
                 alignItems: "center",
                 backgroundColor: theme ? "#00142f" : "#fff",
+                elevation: 5,
+                ...style,
             }}
         >
             {arrow && (

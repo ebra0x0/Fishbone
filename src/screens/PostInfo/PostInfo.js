@@ -8,7 +8,7 @@ import SendOrder from "../../Components/SendOrder";
 
 const PostInfo = ({ route, navigation }) => {
     const { data, lang, theme, PendingOrder } = useSelector((state) => state.user);
-    const { id, postImage, photo, Name, date, foodType, postDesc, key } = route.params;
+    const { id, postImage, photo, Name, date, closedIn, foodType, postDesc, key } = route.params;
     const [loading, setLoading] = useState(false);
     const Styles = styles();
 
@@ -18,31 +18,34 @@ const PostInfo = ({ route, navigation }) => {
     };
 
     const __Get_Expired_Date__ = (date) => {
-        if (date) {
-            const currDate = new Date();
-            const start = new Date(date?.toDate());
-            const elapsedTime = start - currDate;
-
-            const s = parseInt(elapsedTime / 1000);
-            const m = parseInt(elapsedTime / (1000 * 60));
-            const h = parseInt(elapsedTime / (1000 * 60 * 60));
-            const d = parseInt(elapsedTime / (1000 * 60 * 60 * 24));
-
-            if (s < 60) {
-                if (s < 5) {
-                    return lang === "en" ? "Expired" : "انتهى";
-                }
-                return lang === "en" ? "s" : "ث" + s;
-            } else if (m < 60) {
-                return lang === "en" ? "m" : "د" + m;
-            } else if (h < 24) {
-                return lang === "en" ? "h" : "س" + h;
-            } else {
-                return lang === "en" ? "d" : "ي" + d;
-            }
-        } else {
+        const $Date = new Date(date?.toDate());
+        if (!$Date) {
             return "";
         }
+
+        if (!($Date instanceof Date && !isNaN($Date))) {
+            return lang === "en" ? "Invalid date" : "تاريخ غير صالح";
+        }
+
+        const currDate = new Date();
+        const elapsedTime = $Date - currDate;
+
+        if (elapsedTime < 0) {
+            return lang === "en" ? "Expired" : "انتهى";
+        }
+
+        const elapsedDays = Math.floor(elapsedTime / (1000 * 60 * 60 * 24));
+        if (elapsedDays > 0) {
+            return elapsedDays + (lang === "en" ? "d" : "ي");
+        }
+
+        const timeStr = $Date.toLocaleTimeString(undefined, {
+            hour: "numeric",
+            minute: "numeric",
+            hour12: true,
+        });
+
+        return timeStr;
     };
 
     return (
@@ -71,7 +74,7 @@ const PostInfo = ({ route, navigation }) => {
                     <Text style={Styles.expDate}>
                         {CONTENT.ExpiresIn}{" "}
                         <Text style={{ color: "#FF2763", fontWeight: "bold" }}>
-                            {__Get_Expired_Date__(date)}
+                            {__Get_Expired_Date__(closedIn)}
                         </Text>
                     </Text>
                 </View>

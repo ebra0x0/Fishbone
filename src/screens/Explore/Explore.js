@@ -9,8 +9,8 @@ import Translations from "../../Languages";
 import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/stack";
 import * as Location from "expo-location";
 import OpenProfile from "../OpenProfile/OpenProfile";
-import Favorites from "../Favorites/Favorites";
-import Search from "../Search/Search";
+import Favorites from "./Favorites/Favorites";
+import Search from "./Search/Search";
 import PostInfo from "../PostInfo/PostInfo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { getDistance } from "geolib";
@@ -239,13 +239,13 @@ const Explore = () => {
                 if (s < 5) {
                     return CONTENT.Now;
                 }
-                return lang === "en" ? "s" : "ث" + s;
+                return s + (lang === "en" ? "s" : "ث");
             } else if (m < 60) {
-                return lang === "en" ? "m" : "د" + m;
+                return m + (lang === "en" ? "m" : "د");
             } else if (h < 24) {
-                return lang === "en" ? "h" : "س" + h;
+                return h + (lang === "en" ? "h" : "س");
             } else {
-                return lang === "en" ? "d" : "ي" + d;
+                return d + (lang === "en" ? "d" : "ي");
             }
         } else {
             return "";

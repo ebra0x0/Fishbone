@@ -105,13 +105,13 @@ export default ({ route }) => {
                 if (s < 5) {
                     return CONTENT.Now;
                 }
-                return lang === "en" ? "s" : "ث" + s;
+                return s + (lang === "en" ? "s" : "ث");
             } else if (m < 60) {
-                return lang === "en" ? "m" : "د" + m;
+                return m + (lang === "en" ? "m" : "د");
             } else if (h < 24) {
-                return lang === "en" ? "h" : "س" + h;
+                return h + (lang === "en" ? "h" : "س");
             } else {
-                return lang === "en" ? "d" : "ي" + d;
+                return d + (lang === "en" ? "d" : "ي");
             }
         } else {
             return "";

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import { I18nManager, Linking, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { I18nManager } from "react-native";
 import "react-native-gesture-handler";
 import NetInfo from "@react-native-community/netinfo";
 import publicIp from "react-native-public-ip";
-import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Provider } from "react-redux";
 import store from "./src/Store/store";
@@ -18,7 +18,6 @@ import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import messaging from "@react-native-firebase/messaging";
 import { decode, encode } from "base-64";
-import { createStackNavigator } from "@react-navigation/stack";
 import { NativeBaseProvider, Toast } from "native-base";
 import TOAST from "./src/Components/Toast/Toast";
 import Alert from "./src/Components/Alert/Alert";
@@ -120,7 +119,7 @@ const App = () => {
             const currentMessages = await AsyncStorage.getItem("MESSAGES");
 
             const messageArray = currentMessages ? JSON.parse(currentMessages) : [];
-            messageArray.push(remoteMessage.data);
+            Object.keys(remoteMessage.data) !== 0 && messageArray.push(remoteMessage.data);
 
             await AsyncStorage.setItem("MESSAGES", JSON.stringify(messageArray));
         });
@@ -133,14 +132,16 @@ const App = () => {
 
     const Handle_Msgs = (msgs) => {
         const newMsgs = [];
-        msgs.forEach((msg, indx) => {
-            if (msg.orderKey) {
-                newMsgs.push(msg);
-            }
-            if (msgs.length === indx + 1) {
-                setMsgs(newMsgs);
-            }
-        });
+        if (msgs) {
+            msgs.forEach((msg, indx) => {
+                if (msg.orderKey) {
+                    newMsgs.push(msg);
+                }
+                if (msgs.length === indx + 1) {
+                    setMsgs(newMsgs);
+                }
+            });
+        }
     };
 
     const Get_User = async (user) => {
@@ -184,7 +185,7 @@ const App = () => {
                         store.dispatch({ type: "userData/Set_Lang", payload: item });
                         break;
                     case "MESSAGES":
-                        Handle_Msgs(item);
+                        item && Handle_Msgs(item);
                         break;
                 }
             });
