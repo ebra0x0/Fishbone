@@ -149,7 +149,11 @@ const OpenProfile = ({ route }) => {
             </View>
 
             <View style={Styles.wrapper}>
-                <TouchableOpacity style={Styles.row} onPress={() => GetDirections(Data?.id)}>
+                <TouchableOpacity
+                    style={Styles.row}
+                    onPress={() => GetDirections(Data?.id)}
+                    disabled={!Data?.id}
+                >
                     <Ionicons
                         style={Styles.label}
                         name="compass-outline"
@@ -160,7 +164,11 @@ const OpenProfile = ({ route }) => {
                         {Data.address}
                     </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={Styles.row} onPress={() => openPhoneApp(Data?.phone)}>
+                <TouchableOpacity
+                    style={Styles.row}
+                    onPress={() => openPhoneApp(Data?.phone)}
+                    disabled={!Data?.phone}
+                >
                     <Ionicons
                         style={Styles.label}
                         name="call-outline"
@@ -172,7 +180,11 @@ const OpenProfile = ({ route }) => {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={Styles.row} onPress={() => openMailApp(Data?.email)}>
+                <TouchableOpacity
+                    style={Styles.row}
+                    onPress={() => openMailApp(Data?.email)}
+                    disabled={!Data?.email}
+                >
                     <Ionicons
                         style={Styles.label}
                         name="mail-outline"
@@ -184,43 +196,39 @@ const OpenProfile = ({ route }) => {
                     </Text>
                 </TouchableOpacity>
 
-                <View
-                    style={{
-                        marginVertical: 30,
-                        borderRadius: 10,
-                        overflow: "hidden",
-                    }}
-                >
+                <View style={Styles.mapContainer}>
                     {Data.location ? (
-                        <MapView
-                            style={{ height: 140, backgroundColor: "#1e1e1e" }}
-                            region={Data.location}
-                            provider={PROVIDER_GOOGLE}
-                            customMapStyle={mapStyle}
-                        >
-                            <Marker coordinate={Data.location}>
-                                <Ionicons name="location" size={50} color="#18ad79" />
-                            </Marker>
-                        </MapView>
+                        <>
+                            <MapView
+                                style={{ height: 140, backgroundColor: "#1e1e1e" }}
+                                region={Data.location}
+                                provider={PROVIDER_GOOGLE}
+                                customMapStyle={mapStyle}
+                            >
+                                <Marker coordinate={Data.location}>
+                                    <Ionicons name="location" size={50} color="#18ad79" />
+                                </Marker>
+                            </MapView>
+                            <TouchableOpacity
+                                style={{
+                                    position: "absolute",
+                                    bottom: 6,
+                                    right: 6,
+                                    backgroundColor: "#eee",
+                                    padding: 5,
+                                    borderRadius: 4,
+                                }}
+                                activeOpacity={0.8}
+                                onPress={() => GetDirections(Data.id)}
+                            >
+                                <Ionicons name="arrow-redo" size={20} color="#1e1e1e" />
+                            </TouchableOpacity>
+                        </>
                     ) : (
                         <View style={Styles.mapView}>
-                            <ActivityIndicator size={50} color="#1785f5" />
+                            <Text style={Styles.txtView}>Location not found</Text>
                         </View>
                     )}
-                    <TouchableOpacity
-                        style={{
-                            position: "absolute",
-                            bottom: 6,
-                            right: 6,
-                            backgroundColor: "#eee",
-                            padding: 5,
-                            borderRadius: 4,
-                        }}
-                        activeOpacity={0.8}
-                        onPress={() => GetDirections(Data.id)}
-                    >
-                        <Ionicons name="arrow-redo" size={20} color="#1e1e1e" />
-                    </TouchableOpacity>
                 </View>
                 {Data.social && (
                     <View

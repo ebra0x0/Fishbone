@@ -1,9 +1,7 @@
 import { StyleSheet } from "react-native";
 import RootColor from "../../../RootColor";
-import { useSelector } from "react-redux";
 
 const styles = () => {
-    const { theme } = useSelector((state) => state.user);
     const Root = RootColor();
 
     return StyleSheet.create({
@@ -22,15 +20,22 @@ const styles = () => {
         },
         postHeader: {
             color: Root.VIEW_TXT,
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: "bold",
             paddingBottom: 5,
         },
+        postFooter: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingHorizontal: 10,
+            paddingBottom: 3,
+            fontSize: 14,
+        },
+        postOrdersCount: {
+            color: Root.VIEW_TXT,
+        },
         postDate: {
             color: "#1785f5",
-            alignSelf: "flex-end",
-            fontSize: 12,
-            padding: 5,
         },
         actvBuble: {
             position: "absolute",

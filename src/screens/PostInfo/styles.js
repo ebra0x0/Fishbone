@@ -26,6 +26,7 @@ const styles = () => {
             width: "100%",
             height: 300,
             overflow: "hidden",
+            backgroundColor: Root.VIEW,
         },
         restTitle: {
             position: "absolute",

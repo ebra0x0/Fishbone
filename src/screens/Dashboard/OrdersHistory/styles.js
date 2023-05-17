@@ -22,8 +22,6 @@ const styles = () => {
             marginBottom: 10,
             alignItems: "center",
             borderRadius: 6,
-            elevation: theme ? 0 : 20,
-            shadowColor: "#878787",
             gap: 6,
             overflow: "hidden",
         },

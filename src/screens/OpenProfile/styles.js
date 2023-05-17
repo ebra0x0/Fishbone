@@ -33,6 +33,11 @@ const styles = () => {
             backgroundColor: Root.VIEW,
             borderRadius: 5,
         },
+        mapContainer: {
+            marginVertical: 30,
+            borderRadius: 10,
+            overflow: "hidden",
+        },
         mapView: {
             height: 140,
             backgroundColor: Root.VIEW,
@@ -47,6 +52,9 @@ const styles = () => {
             textAlign: "right",
             color: Root.VIEW_TXT,
             fontSize: 16,
+        },
+        txtView: {
+            color: Root.VIEW_TXT,
         },
     });
 };

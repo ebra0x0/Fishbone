@@ -179,7 +179,6 @@ const CreatePost = ({ navigation }) => {
                                     ...$ReqData,
                                     key: newPost.id,
                                     date: now,
-                                    closedIn: closedTime.value,
                                     elapsed: CONTENT.Now,
                                 };
 
@@ -234,10 +233,9 @@ const CreatePost = ({ navigation }) => {
                         {image ? (
                             <Image style={{ width: "100%", height: "100%" }} source={{ uri: image }} />
                         ) : (
-                            <MaterialCommunityIcons
-                                name="plus"
-                                size={50}
-                                color={theme ? "#fff" : "#252525"}
+                            <Image
+                                style={{ width: 30, height: 30 }}
+                                source={require("../../../../assets/add.png")}
                             />
                         )}
                     </TouchableOpacity>

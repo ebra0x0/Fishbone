@@ -11,7 +11,6 @@ const styles = () => {
             flex: 1,
             backgroundColor: Root.CONTAINER,
             paddingTop: 100,
-            paddingBottom: 50,
         },
         wrapper: {
             paddingHorizontal: 20,
