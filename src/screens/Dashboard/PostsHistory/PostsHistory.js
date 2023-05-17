@@ -2,6 +2,7 @@ import React, { useEffect, useState, memo } from "react";
 import { View, Text, FlatList, Image } from "react-native";
 import styles from "./styles";
 import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
+import Translations from "../../../Languages";
 
 const PostsHistory = ({ route }) => {
     const [posts, setPosts] = useState(route.params.posts);
@@ -15,6 +16,10 @@ const PostsHistory = ({ route }) => {
         }
     }, []);
 
+    const CONTENT = {
+        dashboardStatsticsOrders: Translations().t("dashboardStatsticsOrders"),
+    };
+
     const renderItems = ({ item }) => {
         return (
             <View style={Styles.post}>
@@ -22,9 +27,17 @@ const PostsHistory = ({ route }) => {
                     <Image style={{ flex: 1.5 }} source={{ uri: item.postImage }} />
                     <View style={{ flex: 1, paddingHorizontal: 10 }}>
                         <Text style={Styles.postHeader}>{item.foodType}</Text>
-                        <Text style={{ color: "#a0a0a0" }}>{item.postDesc}</Text>
+                        <Text style={{ color: "#a0a0a0" }} numberOfLines={2} ellipsizeMode="tail">
+                            {item.postDesc}
+                        </Text>
                     </View>
-                    <Text style={Styles.postDate}>{item.date.toDate().toDateString()}</Text>
+                    <View style={Styles.postFooter}>
+                        <Text style={Styles.postOrdersCount}>
+                            {CONTENT.dashboardStatsticsOrders}:
+                            <Text style={{ color: "#0dbc79", fontWeight: "bold" }}> {item.ordersCount} </Text>
+                        </Text>
+                        <Text style={Styles.postDate}>{item.date.toDate().toDateString()}</Text>
+                    </View>
                     {item.active && <View style={Styles.actvBuble} />}
                 </View>
             </View>
