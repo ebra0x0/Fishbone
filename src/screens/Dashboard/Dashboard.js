@@ -1,19 +1,12 @@
 import React, { useEffect, useState, memo } from "react";
-import {
-    View,
-    Text,
-    TouchableHighlight,
-    ActivityIndicator,
-    TouchableOpacity,
-    InteractionManager,
-} from "react-native";
+import { View, Text, TouchableHighlight, ActivityIndicator, TouchableOpacity, Image } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
 import { Box, HStack, Skeleton, VStack, useToast } from "native-base";
 import { LinearGradient } from "expo-linear-gradient";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import Translations from "../../Languages";
 import CreatePost from "./CreatePost/CreatePost";
@@ -80,7 +73,6 @@ const Dashboard = () => {
     const navigation = useNavigation();
 
     useEffect(() => {
-        Update_User_Post();
         fetchActivePost();
         fetchStatistics();
         fetchOrders();
@@ -91,64 +83,56 @@ const Dashboard = () => {
     useEffect(() => {
         if (userPost) {
             const Id = userPost.key?.slice(0, 6).toUpperCase();
-            const From = new Date(userPost.date.toDate()).toDateString();
-            const To = new Date(userPost.closedIn).toDateString();
+
+            const From = new Date(userPost?.date?.toDate()).toDateString() || "";
+            const To = new Date(userPost?.closedIn?.toDate()).toDateString() || "";
             setActivePost((prev) => ({ ...prev, id: Id, from: From, to: To, Data: userPost }));
         }
     }, [userPost]);
 
-    const Update_User_Post = () => {
-        $Posts_Ref
-            .where("id", "==", data?.id)
-            .get()
-            .then((querySnapshot) => {
-                if (querySnapshot?.size) {
-                    querySnapshot.forEach((upost) => {
-                        dispatch({
-                            type: "userData/Set_User_Post",
-                            payload: upost.data(),
-                        });
-                    });
-                } else {
-                    dispatch({
-                        type: "userData/Del_User_Post",
-                    });
-                }
-            });
-    };
-
     const fetchActivePost = () => {
         try {
-            setLoading((prev) => !prev);
+            setLoading(true);
             $User_Ref
                 .collection("posts")
                 .where("active", "==", true)
-                .onSnapshot((query) => {
-                    query?.size &&
-                        query.forEach(async (active) => {
-                            const { date, closedIn } = active.data();
-                            const isExpired = await Check_Post_Expired(active.id);
+                .get()
+                .then((query) => {
+                    query?.size
+                        ? query.forEach(async (active) => {
+                              const { date, closedIn } = active.data();
+                              const isExpired = await Check_Post_Expired(active.id);
 
-                            if (isExpired) {
-                                // Remove it from public
-                                $Posts_Ref.doc(active.id).delete();
-                                // Inactivate it from private
-                                active.ref.update({ active: false });
-                            } else {
-                                const Id = active.id.slice(0, 6).toUpperCase();
-                                const From = new Date(date?.toDate()).toDateString();
-                                const To = new Date(closedIn?.toDate()).toDateString();
+                              if (isExpired) {
+                                  await Remove_Post(active.id, false);
 
-                                setActivePost((prev) => ({
-                                    ...prev,
-                                    id: Id,
-                                    from: From || "",
-                                    to: To || "",
-                                    Data: active.data(),
-                                }));
-                            }
-                        });
-                    setLoading((prev) => !prev);
+                                  setLoading(false);
+                                  return;
+                              } else {
+                                  const Id = active.id.slice(0, 6).toUpperCase();
+                                  const From = new Date(date?.toDate()).toDateString();
+                                  const To = new Date(closedIn?.toDate()).toDateString();
+
+                                  setActivePost((prev) => ({
+                                      ...prev,
+                                      id: Id,
+                                      from: From,
+                                      to: To,
+                                      Data: active.data(),
+                                  }));
+
+                                  dispatch({
+                                      type: "userData/Set_User_Post",
+                                      payload: { ...active.data(), key: active.id },
+                                  });
+
+                                  setLoading(false);
+                              }
+                          })
+                        : setLoading(false);
+                    dispatch({
+                        type: "userData/Del_User_Post",
+                    });
                 });
         } catch (e) {
             console.log(e);
@@ -163,30 +147,46 @@ const Dashboard = () => {
                 let Total = { count: querySnapshot?.size, Data: [] };
 
                 querySnapshot?.size &&
-                    querySnapshot.forEach((post, indx) => {
+                    querySnapshot.forEach(async (post, indx) => {
                         const { date } = post.data();
+                        const PostOrdersCount = await post.ref
+                            .collection("orders")
+                            .count()
+                            .get()
+                            .then((c) => c.data().count);
                         const Now = new Date();
                         const Elapsed = parseInt((Now - new Date(date?.toDate())) / (1000 * 60 * 60 * 24));
 
-                        Total.Data.push({ ...post.data(), key: indx });
+                        const PostData = {
+                            ...post.data(),
+                            ordersCount: PostOrdersCount,
+                            key: indx,
+                        };
+
+                        Total.Data.push(PostData);
                         if (Elapsed <= 1) {
                             Today = {
                                 count: Today.count + 1,
-                                Data: [...Today.Data, { ...post.data(), key: indx }],
+                                Data: [...Today.Data, PostData],
                             };
                             Weeks = {
                                 count: Weeks.count + 1,
-                                Data: [...Weeks.Data, { ...post.data(), key: indx }],
+                                Data: [...Weeks.Data, PostData],
                             };
                         } else if (Elapsed <= 7) {
                             Weeks = {
                                 count: Weeks.count + 1,
-                                Data: [...Weeks.Data, { ...post.data(), key: indx }],
+                                Data: [...Weeks.Data, PostData],
                             };
                         }
 
                         if (indx + 1 === querySnapshot?.size) {
-                            setStatstics((prev) => ({ ...prev, postT: Today, postW: Weeks, postTo: Total }));
+                            setStatstics((prev) => ({
+                                ...prev,
+                                postT: Today,
+                                postW: Weeks,
+                                postTo: Total,
+                            }));
                         }
                     });
             });
@@ -248,11 +248,26 @@ const Dashboard = () => {
                                 .doc(order.data().source)
                                 .get()
                                 .then((user) => {
-                                    const { photo, Name } = user.data();
+                                    const { id, photo, Name, phone, address, location, email, social } =
+                                        user.data();
 
                                     Canceled = {
                                         count: Canceled.count,
-                                        Data: [...Canceled.Data, { ...order.data(), photo, Name, key: indx }],
+                                        Data: [
+                                            ...Canceled.Data,
+                                            {
+                                                ...order.data(),
+                                                id,
+                                                photo,
+                                                Name,
+                                                phone,
+                                                address,
+                                                location,
+                                                email,
+                                                social,
+                                                key: indx,
+                                            },
+                                        ],
                                     };
                                 });
 
@@ -266,41 +281,34 @@ const Dashboard = () => {
         }
     };
 
-    const Remove_Post = async () => {
-        setBtnLoading((prev) => !prev);
-        await $Posts_Ref
-            .where("id", "==", data?.id)
-            .get()
-            .then((posts) => {
-                if (posts?.size) {
-                    //Del post from global posts
-                    posts.forEach((post) => post.ref.delete());
+    const Remove_Post = async (key, action) => {
+        if (key) {
+            action && setBtnLoading((prev) => !prev);
+            //Del post from global posts
+            await $Posts_Ref
+                .doc(key)
+                .delete()
+                .then(() => {
                     // Inactivate post from private posts
-                    $User_Ref
-                        .collection("posts")
-                        .get()
-                        .then((Uposts) => {
-                            Uposts.forEach((Upost) => Upost.ref.update({ active: false }));
-                        });
-                }
-                //Del post from app
-                dispatch({
-                    type: "userData/Del_User_Post",
+                    $User_Ref.collection("posts").doc(key).update({ active: false });
                 });
-                setActivePost((prev) => ({ ...prev, id: "", from: "", to: "", Data: {} }));
-            })
-            .catch((e) => {
-                console.log(e);
-                setBtnLoading((prev) => !prev);
-            });
 
-        setBtnLoading((prev) => !prev);
-        Toast.show({
-            render: () => {
-                return <TOAST status="error" msg="Post Removed" />;
-            },
-            duration: 2000,
-        });
+            //Del post from app
+            dispatch({
+                type: "userData/Del_User_Post",
+            });
+            setActivePost((prev) => ({ ...prev, id: "", from: "", to: "", Data: {} }));
+
+            if (action) {
+                setBtnLoading((prev) => !prev);
+                Toast.show({
+                    render: () => {
+                        return <TOAST status="error" msg="Post Removed" />;
+                    },
+                    duration: 2000,
+                });
+            }
+        }
     };
 
     const __Get_Elapsed__ = (date) => {
@@ -364,9 +372,25 @@ const Dashboard = () => {
     };
 
     const MAIN = memo(() => {
+        const Buttons = [
+            {
+                key: 1,
+                name: "refresh",
+                size: 30,
+                color: "#1785F5",
+                fun: () => fetchActivePost(),
+            },
+        ];
+        const HeaderButtons = Buttons.map((btn) => {
+            return (
+                <TouchableOpacity style={{ marginLeft: 15 }} key={btn.key} onPress={btn.fun}>
+                    <Ionicons name={btn.name} size={btn.size} color={btn.color} />
+                </TouchableOpacity>
+            );
+        });
         return (
             <View style={Styles.container}>
-                <ScreenHeader title={CONTENT.dashboardTitle} />
+                <ScreenHeader title={CONTENT.dashboardTitle} btns={HeaderButtons} />
                 <Box style={Styles.wrapper}>
                     <Text style={Styles.header}>{CONTENT.dashboardActivePost}</Text>
 
@@ -423,7 +447,7 @@ const Dashboard = () => {
                                         <TouchableHighlight
                                             style={[Styles.postBtn, { backgroundColor: "#ff2b4e" }]}
                                             underlayColor="#cd1735"
-                                            onPress={Remove_Post}
+                                            onPress={() => Remove_Post(userPost.key, true)}
                                         >
                                             {btnLoading ? (
                                                 <ActivityIndicator color="#fff" size={25} />
@@ -441,10 +465,9 @@ const Dashboard = () => {
                                     onPress={OpenCreatePost}
                                     underlayColor="transparent"
                                 >
-                                    <MaterialCommunityIcons
-                                        name="plus"
-                                        size={50}
-                                        color={theme ? "#fff" : "#252525"}
+                                    <Image
+                                        style={{ width: 30, height: 30 }}
+                                        source={require("../../../assets/add.png")}
                                     />
                                 </TouchableOpacity>
                             )}
@@ -461,11 +484,9 @@ const Dashboard = () => {
                             underlayColor="#00B09A"
                             onPress={() =>
                                 statstics.postT.Data.length &&
-                                InteractionManager.runAfterInteractions(() => {
-                                    navigation.navigate("PostsHistory", {
-                                        title: CONTENT.todayPosts,
-                                        posts: statstics.postT.Data,
-                                    });
+                                navigation.navigate("PostsHistory", {
+                                    title: CONTENT.todayPosts,
+                                    posts: statstics.postT.Data,
                                 })
                             }
                         >
