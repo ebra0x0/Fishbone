@@ -24,7 +24,7 @@ import { HStack, Toast } from "native-base";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import SendNotification from "../../../Components/SendNotification";
 
-const CreatePost = ({ navigation }) => {
+const CreatePost = ({ navigation, route }) => {
     const { data, theme } = useSelector((state) => state.user);
     const [foodType, setFoodType] = useState("");
     const [postDesc, setPostDesc] = useState("");
@@ -140,12 +140,38 @@ const CreatePost = ({ navigation }) => {
             is24Hour: false,
         });
     };
+    const HAS_ACTIVE_POST = async () => {
+        let has = null;
+        await $Posts_Ref
+            .where("id", "==", data?.id)
+            .get()
+            .then((query) => {
+                if (query.size) {
+                    has = true;
+                } else {
+                    has = false;
+                }
+            });
+        return has;
+    };
 
     const Publish = async (foodType, postDesc, closedTime, image) => {
         if (done) {
             try {
                 setLoading(true);
                 Keyboard.dismiss();
+                const hasActivePost = await HAS_ACTIVE_POST();
+                if (hasActivePost) {
+                    Toast.show({
+                        render: () => {
+                            return <TOAST status="success" msg="You have active post already" />;
+                        },
+                        duration: 3000,
+                    });
+                    route.params.refresh();
+                    navigation.goBack();
+                    return;
+                }
 
                 await $Posts_Ref
                     .where("source", "==", data?.id)

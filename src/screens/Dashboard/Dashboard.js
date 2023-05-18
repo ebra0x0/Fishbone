@@ -325,7 +325,7 @@ const Dashboard = () => {
 
     const OpenCreatePost = async () => {
         if (reachedLimit === false) {
-            navigation.navigate("CreatePost");
+            navigation.navigate("CreatePost", { refresh: fetchActivePost });
         } else {
             Toast.show({
                 render: () => {
