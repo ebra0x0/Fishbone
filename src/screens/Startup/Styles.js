@@ -2,8 +2,6 @@ import { StyleSheet } from "react-native";
 import RootColor from "../../RootColor";
 
 const Styles = () => {
-    const Root = RootColor();
-
     return StyleSheet.create({
         container: {
             flex: 1,

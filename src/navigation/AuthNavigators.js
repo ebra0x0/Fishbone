@@ -13,7 +13,7 @@ const AuthNavigators = () => {
                 presentation: "transparentModal",
             }}
         >
-            <Stack.Screen name="Startup" component={Startup} />
+            <Stack.Screen name="Startup" component={Startup} options={{ animationEnabled: false }} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Registration" component={RegistrationScreen} />
         </Stack.Navigator>
