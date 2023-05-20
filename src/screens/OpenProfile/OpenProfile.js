@@ -1,25 +1,24 @@
 import React, { useEffect, useState, memo } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import mapStyle from "../../Components/Map/mapStyle";
-import { Ionicons } from "@expo/vector-icons";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
-import GetDirections from "../../Components/GetDirections";
+import { View, Text, TouchableOpacity, Linking } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import styles from "./styles";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
+import styles from "./styles";
+import mapStyle from "../../Components/Map/mapStyle";
+import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import Avatar from "../../Components/Avatar/Avatar";
+import GetDirections from "../../Components/GetDirections";
 
 const OpenProfile = ({ route }) => {
     const Styles = styles();
     const { data, theme, favorites } = useSelector((state) => state.user);
     const Data = route.params;
     const [isFav, setIsFav] = useState(null);
-    const scale = useSharedValue(1);
-
+    const _AnimScale = useSharedValue(1);
     const AnimStyle = useAnimatedStyle(() => {
         return {
-            transform: [{ scale: scale.value }],
+            transform: [{ scale: _AnimScale.value }],
         };
     });
 
@@ -30,9 +29,9 @@ const OpenProfile = ({ route }) => {
     }, []);
     useEffect(() => {
         if (isFav) {
-            scale.value = withSpring(0.7, {}, (end) => {
+            _AnimScale.value = withSpring(0.7, {}, (end) => {
                 if (end) {
-                    scale.value = withSpring(1, { mass: 0.4, damping: 2 });
+                    _AnimScale.value = withSpring(1, { mass: 0.4, damping: 2 });
                 }
             });
         }
@@ -204,6 +203,9 @@ const OpenProfile = ({ route }) => {
                                 region={Data.location}
                                 provider={PROVIDER_GOOGLE}
                                 customMapStyle={mapStyle}
+                                loadingEnabled={true}
+                                loadingBackgroundColor={Styles.mapView.backgroundColor}
+                                loadingIndicatorColor="#1785f5"
                             >
                                 <Marker coordinate={Data.location}>
                                     <Ionicons name="location" size={50} color="#18ad79" />

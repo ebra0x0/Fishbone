@@ -55,7 +55,6 @@ const SearchBar = (props) => {
         if (value) {
             props.loading(true);
             const lower = value.toLowerCase().trim();
-            console.log(lower);
             $UsersRef
                 .where("restaurant", "==", true)
                 .where("userName", ">=", lower)

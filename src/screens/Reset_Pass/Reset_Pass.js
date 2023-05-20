@@ -4,9 +4,9 @@ import auth from "@react-native-firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import Translations from "../../Languages";
+import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import { Toast } from "native-base";
 import TOAST from "../../Components/Toast/Toast";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 
 const Reset_Pass = ({ navigation }) => {
     const Styles = styles();
@@ -71,11 +71,9 @@ const Reset_Pass = ({ navigation }) => {
         }
     };
 
-    const HeaderTitle = "Reset Password";
-
     return (
         <View style={Styles.container}>
-            <ScreenHeader arrow={true} title={HeaderTitle} />
+            <ScreenHeader arrow={true} />
             <TouchableOpacity
                 style={{ position: "absolute", top: 50, left: 20 }}
                 onPress={() => navigation.goBack()}

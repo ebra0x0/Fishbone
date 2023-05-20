@@ -9,11 +9,9 @@ import { Provider } from "react-redux";
 import store from "./src/Store/store";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
-
 import AuthNavigators from "./src/navigation/AuthNavigators";
 import AccNavigators from "./src/navigation/AccNavigators";
 import { Boot, ConfPhoto, NoConnection } from "./src/screens";
-
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import messaging from "@react-native-firebase/messaging";
@@ -40,7 +38,7 @@ const App = () => {
     const [Theme, setTheme] = useState(theme);
     const [confPhoto, setConfPhoto] = useState({ has: null, orderId: "" });
 
-    const usersRef = firestore().collection("users");
+    const $UserRef = firestore().collection("users");
 
     I18nManager.allowRTL(true);
     I18nManager.swapLeftAndRightInRTL(false);
@@ -85,8 +83,6 @@ const App = () => {
     useEffect(() => {
         Token && store.dispatch({ type: "userData/Set_Token", payload: Token });
     }, [Token]);
-
-    //Functions
 
     const Msgs_Permission = async () => {
         const authStatus = await messaging().requestPermission();
@@ -146,7 +142,7 @@ const App = () => {
 
     const Get_User = async (user) => {
         try {
-            usersRef.doc(user?.uid).onSnapshot((querySnapshot) => {
+            $UserRef.doc(user?.uid).onSnapshot((querySnapshot) => {
                 if (querySnapshot?.exists) {
                     store.dispatch({ type: "userData/Set_User", payload: querySnapshot?.data() });
                     setUserData(querySnapshot?.data());

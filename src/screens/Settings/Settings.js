@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, TouchableOpacity, View, Animated } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./styles";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
@@ -33,35 +33,25 @@ export default () => {
                     <Text style={Styles.rowTxt}>{CONTENT.settVersion}</Text>
                     <Text style={Styles.rowTxt}>1.0.0</Text>
                 </View>
-                <View
-                    style={{
-                        flexDirection: "row",
-                        marginTop: 20,
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
+                <TouchableOpacity
+                    style={[Styles.toggleBtn, { backgroundColor: theme ? "#001837" : "#fff" }]}
+                    onPress={langToggle}
                 >
-                    <TouchableOpacity style={Styles.toggleBtn} onPress={themeToggle}>
-                        <Ionicons
-                            name={theme ? "sunny-outline" : "moon-outline"}
-                            size={20}
-                            color={theme ? "#000" : "#fff"}
-                        />
-                        <Text style={{ color: theme ? "#000" : "#fff", marginLeft: 5, fontWeight: "bold" }}>
-                            {theme ? CONTENT.settLightTheme : CONTENT.settDarkTheme}
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[Styles.toggleBtn, { backgroundColor: theme ? "#001837" : "#fff" }]}
-                        onPress={langToggle}
-                    >
-                        <Text style={{ color: theme ? "#fff" : "#000", fontWeight: "bold" }}>
-                            {lang == "en" ? "عربي" : "English"}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                    <Text style={{ color: theme ? "#fff" : "#000", fontWeight: "bold" }}>
+                        {lang == "en" ? "عربي" : "English"}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={Styles.toggleBtn} onPress={themeToggle}>
+                    <Ionicons
+                        name={theme ? "sunny-outline" : "moon-outline"}
+                        size={20}
+                        color={theme ? "#000" : "#fff"}
+                    />
+                    <Text style={{ color: theme ? "#000" : "#fff", marginLeft: 5, fontWeight: "bold" }}>
+                        {theme ? CONTENT.settLightTheme : CONTENT.settDarkTheme}
+                    </Text>
+                </TouchableOpacity>
             </View>
-            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}></View>
         </View>
     );
 };

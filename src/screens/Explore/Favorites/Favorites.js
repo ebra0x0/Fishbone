@@ -6,9 +6,9 @@ import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
 import styles from "./styles";
 import Translations from "../../../Languages";
 import { Toast } from "native-base";
-import TOAST from "../../../Components/Toast/Toast";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Avatar from "../../../Components/Avatar/Avatar";
+import TOAST from "../../../Components/Toast/Toast";
 
 const Favorites = ({ navigation }) => {
     const Styles = styles();
@@ -93,7 +93,7 @@ const Favorites = ({ navigation }) => {
                         style={{ alignSelf: "center" }}
                         onPress={() => Dis_Fav(item.id, item.id)}
                     >
-                        <Ionicons name="heart" size={30} color="#0080de" />
+                        <Ionicons name="heart" size={30} color="#FF2763" />
                     </TouchableOpacity>
                 </Animated.View>
             </View>

@@ -19,8 +19,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Avatar from "../../Components/Avatar/Avatar";
 import { useEffect } from "react";
 import Translations from "../../Languages";
-import TOAST from "../../Components/Toast/Toast";
 import { Toast } from "native-base";
+import TOAST from "../../Components/Toast/Toast";
 
 export default () => {
     const Styles = styles();
@@ -76,6 +76,7 @@ export default () => {
                     setAllDone(false);
                 })
                 .catch((e) => console.log(e));
+
             Toast.show({
                 render: () => {
                     return <TOAST status="success" msg="Profile Updated" />;
@@ -220,7 +221,7 @@ export default () => {
                                 onPress={() => updateProfile(address)}
                             >
                                 {loading ? (
-                                    <ActivityIndicator size={30} color="#fff" />
+                                    <ActivityIndicator size={25} color="#fff" />
                                 ) : (
                                     <Text style={{ color: "#fff", fontSize: 16 }}>{CONTENT.updateBtn}</Text>
                                 )}

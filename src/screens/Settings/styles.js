@@ -25,13 +25,16 @@ const styles = () => {
             flex: 1,
             paddingTop: 50,
             paddingHorizontal: 20,
+            gap: 15,
         },
         row: {
             flexDirection: lang == "en" ? "row" : "row-reverse",
-            height: 60,
-            marginBottom: 10,
+            height: 50,
             alignItems: "center",
             justifyContent: "space-between",
+            backgroundColor: Root.VIEW,
+            paddingHorizontal: 10,
+            borderRadius: 6,
         },
         rowTxt: {
             fontSize: 18,
@@ -39,8 +42,7 @@ const styles = () => {
         },
         toggleBtn: {
             flexDirection: "row",
-            width: "49%",
-            height: 40,
+            height: 50,
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: Root.TOGGLEVIEW,

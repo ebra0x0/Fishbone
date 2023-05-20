@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, memo, lazy } from "react";
 import { useSelector } from "react-redux";
 import {
     View,
@@ -9,19 +9,8 @@ import {
     TouchableOpacity,
     RefreshControl,
     TouchableHighlight,
+    Linking,
 } from "react-native";
-import Styles from "./Styles";
-import firestore from "@react-native-firebase/firestore";
-import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/stack";
-import { Ionicons } from "@expo/vector-icons";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
-import OpenProfile from "../OpenProfile/OpenProfile";
-import GetDirections from "../../Components/GetDirections";
-import Translations from "../../Languages";
-import SendNotification from "../../Components/SendNotification";
-import { Toast } from "native-base";
-import TOAST from "../../Components/Toast/Toast";
-import { Linking } from "react-native";
 import Animated, {
     runOnJS,
     useAnimatedStyle,
@@ -29,8 +18,18 @@ import Animated, {
     withSpring,
     withTiming,
 } from "react-native-reanimated";
+import firestore from "@react-native-firebase/firestore";
+import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/stack";
+import { Toast } from "native-base";
+import Styles from "./Styles";
+import { Ionicons } from "@expo/vector-icons";
+import Translations from "../../Languages";
+import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import Avatar from "../../Components/Avatar/Avatar";
-import { memo } from "react";
+const OpenProfile = lazy(() => import("../OpenProfile/OpenProfile"));
+import TOAST from "../../Components/Toast/Toast";
+import GetDirections from "../../Components/GetDirections";
+import SendNotification from "../../Components/SendNotification";
 
 export default ({ route }) => {
     const styles = Styles();

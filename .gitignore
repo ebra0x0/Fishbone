@@ -1,6 +1,8 @@
 node_modules/
-Eas.confige.txt
+Public/
 google-services.json
+README.md
+Eas.confige.txt
 eas.json
 yarn.lock
 .expo/

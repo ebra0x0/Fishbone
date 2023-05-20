@@ -1,16 +1,15 @@
 import React, { useEffect, useState, memo } from "react";
-import { View, Text, FlatList, TouchableOpacity, Dimensions } from "react-native";
-import SearchBar from "../../../Components/SearchBar/SearchBar";
-import styles from "./styles";
-import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
-import { ActivityIndicator } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import { View, Text, FlatList, TouchableOpacity, Dimensions, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import SendOrder from "../../../Components/SendOrder";
-import Avatar from "../../../Components/Avatar/Avatar";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
+import styles from "./styles";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Translations from "../../../Languages";
+import SearchBar from "../../../Components/SearchBar/SearchBar";
+import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
+import Avatar from "../../../Components/Avatar/Avatar";
+import SendOrder from "../../../Components/SendOrder";
 
 const Search = () => {
     const Styles = styles();
