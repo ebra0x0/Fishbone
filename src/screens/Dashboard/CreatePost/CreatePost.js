@@ -1,4 +1,4 @@
-import React, { useRef, useState, memo } from "react";
+import React, { useRef, useState, useEffect, memo } from "react";
 import {
     View,
     Text,
@@ -10,21 +10,20 @@ import {
     TouchableHighlight,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import styles from "./styles";
-import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
-import Translations from "../../../Languages";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import firestore from "@react-native-firebase/firestore";
 import storage from "@react-native-firebase/storage";
 import * as ImagePicker from "expo-image-picker";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useEffect } from "react";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import TOAST from "../../../Components/Toast/Toast";
 import { HStack, Toast } from "native-base";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
+import styles from "./styles";
+import Translations from "../../../Languages";
+import { Ionicons } from "@expo/vector-icons";
+import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
+import TOAST from "../../../Components/Toast/Toast";
 import SendNotification from "../../../Components/SendNotification";
 
-const CreatePost = ({ navigation, route }) => {
+const CreatePost = ({ navigation }) => {
     const { data, theme } = useSelector((state) => state.user);
     const [foodType, setFoodType] = useState("");
     const [postDesc, setPostDesc] = useState("");
@@ -83,7 +82,7 @@ const CreatePost = ({ navigation, route }) => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [6, 4],
+            aspect: [5, 4],
             quality: 1,
         });
 
@@ -168,7 +167,6 @@ const CreatePost = ({ navigation, route }) => {
                         },
                         duration: 3000,
                     });
-                    route.params.refresh();
                     navigation.goBack();
                     return;
                 }
