@@ -1,22 +1,22 @@
-import React, { useEffect, useState, memo } from "react";
+import React, { useEffect, useState, memo, lazy } from "react";
 import { View, Text, TouchableHighlight, ActivityIndicator, TouchableOpacity, Image } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { createStackNavigator, CardStyleInterpolators } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
-import { Box, HStack, Skeleton, VStack, useToast } from "native-base";
+import { Box, HStack, Skeleton, VStack, Toast } from "native-base";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import Translations from "../../Languages";
-import CreatePost from "./CreatePost/CreatePost";
-import TOAST from "../../Components/Toast/Toast";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
-import PostInfo from "../PostInfo/PostInfo";
-import PostsHistory from "./PostsHistory/PostsHistory";
-import OrdersHistory from "./OrdersHistory/OrdersHistory";
-import OpenProfile from "../OpenProfile/OpenProfile";
 import Check_Post_Expired from "../../Components/CheckPostExpired";
+import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
+import TOAST from "../../Components/Toast/Toast";
+const CreatePost = lazy(() => import("./CreatePost/CreatePost"));
+const PostInfo = lazy(() => import("../PostInfo/PostInfo"));
+const PostsHistory = lazy(() => import("./PostsHistory/PostsHistory"));
+const OrdersHistory = lazy(() => import("./OrdersHistory/OrdersHistory"));
+const OpenProfile = lazy(() => import("../OpenProfile/OpenProfile"));
 
 const Dashboard = () => {
     const { data, userPost, theme, lang } = useSelector((state) => state.user);
@@ -69,7 +69,6 @@ const Dashboard = () => {
 
     const dispatch = useDispatch();
     const Stack = createStackNavigator();
-    const Toast = useToast();
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -325,7 +324,7 @@ const Dashboard = () => {
 
     const OpenCreatePost = async () => {
         if (reachedLimit === false) {
-            navigation.navigate("CreatePost", { refresh: fetchActivePost });
+            navigation.navigate("CreatePost");
         } else {
             Toast.show({
                 render: () => {
@@ -378,7 +377,7 @@ const Dashboard = () => {
                 name: "refresh",
                 size: 30,
                 color: "#1785F5",
-                fun: () => fetchActivePost(),
+                fun: fetchActivePost,
             },
         ];
         const HeaderButtons = Buttons.map((btn) => {

@@ -1,22 +1,22 @@
-import React, { useEffect, useRef, useState, memo } from "react";
+import React, { useEffect, useRef, useState, memo, lazy } from "react";
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, Image, FlatList } from "react-native";
-import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
-import styles from "./styles";
 import { useDispatch, useSelector } from "react-redux";
-import firestore from "@react-native-firebase/firestore";
-import { CheckIcon, HStack, Select, Skeleton, useToast } from "native-base";
-import Translations from "../../Languages";
 import { CardStyleInterpolators, createStackNavigator } from "@react-navigation/stack";
-import * as Location from "expo-location";
-import OpenProfile from "../OpenProfile/OpenProfile";
-import Favorites from "./Favorites/Favorites";
-import Search from "./Search/Search";
-import PostInfo from "../PostInfo/PostInfo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import firestore from "@react-native-firebase/firestore";
+import { CheckIcon, HStack, Select, Skeleton, Toast } from "native-base";
+import styles from "./styles";
+import Translations from "../../Languages";
 import { getDistance } from "geolib";
-import TOAST from "../../Components/Toast/Toast";
+import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import Avatar from "../../Components/Avatar/Avatar";
 import Check_Post_Expired from "../../Components/CheckPostExpired";
+import Location from "expo-location";
+const OpenProfile = lazy(() => import("../OpenProfile/OpenProfile"));
+const Favorites = lazy(() => import("./Favorites/Favorites"));
+const Search = lazy(() => import("./Search/Search"));
+const PostInfo = lazy(() => import("../PostInfo/PostInfo"));
+import TOAST from "../../Components/Toast/Toast";
 
 const Explore = () => {
     const Styles = styles();
@@ -48,7 +48,6 @@ const Explore = () => {
 
     const Stack = createStackNavigator();
     const dispatch = useDispatch();
-    const Toast = useToast();
     const CONTENT = {
         exploreTitle: Translations().t("exploreTitle"),
         exploreEmptyPosts: Translations().t("exploreEmptyPosts"),
