@@ -1,38 +1,29 @@
-import React, { useRef, useState, useEffect, memo } from "react";
-import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    ActivityIndicator,
-    Image,
-    Keyboard,
-    TouchableHighlight,
-} from "react-native";
+import React, { useState, useEffect, memo } from "react";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, Keyboard } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import firestore from "@react-native-firebase/firestore";
 import storage from "@react-native-firebase/storage";
 import * as ImagePicker from "expo-image-picker";
-import { HStack, Toast } from "native-base";
+import { Toast } from "native-base";
 import styles from "./styles";
 import Translations from "../../../Languages";
-import { Ionicons } from "@expo/vector-icons";
 import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
-import TOAST from "../../../Components/Toast/Toast";
+import TOAST from "../../../Components/TOAST/TOAST";
 import SendNotification from "../../../Components/SendNotification";
+import PickTime from "../../../Components/PickTime/PickTime";
 
 const CreatePost = ({ navigation }) => {
     const { data, theme } = useSelector((state) => state.user);
     const [foodType, setFoodType] = useState("");
     const [postDesc, setPostDesc] = useState("");
-    const [closedTime, setClosedTime] = useState({ value: new Date(), valid: false });
     const [done, setDone] = useState(false);
     const [image, setImage] = useState(null);
     const [loading, setLoading] = useState(false);
-
-    const intervalRef = useRef();
+    const [expiresAt, setExpiresAt] = useState({
+        value: firestore.Timestamp.now().toDate(),
+        valid: false,
+    });
 
     const Styles = styles();
 
@@ -45,7 +36,6 @@ const CreatePost = ({ navigation }) => {
         postfoodImg: Translations().t("postfoodImg"),
         postTypeFood: Translations().t("postTypeFood"),
         postFoodContains: Translations().t("postFoodContains"),
-        postClosedTime: Translations().t("postClosedTime"),
         postCreateBtn: Translations().t("postCreateBtn"),
         postPickAt: Translations().t("postPickAt"),
         Now: Translations().t("Now"),
@@ -54,35 +44,18 @@ const CreatePost = ({ navigation }) => {
     const HeaderTitle = Translations().t("postTitle");
 
     useEffect(() => {
-        return () => {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        };
-    }, []);
-    useEffect(() => {
-        if (image && foodType && postDesc && closedTime.valid) {
+        if (image && foodType && postDesc && expiresAt.valid) {
             setDone(true);
         } else {
             setDone(false);
         }
-    }, [image, foodType, postDesc, closedTime]);
-
-    useEffect(() => {
-        closedTime.valid && Date_Syncing(closedTime.value);
-        return () => clearInterval(intervalRef.current);
-    }, [closedTime]);
-
-    const Date_Syncing = () => {
-        intervalRef.current = setInterval(() => {
-            handleTimeColsed(closedTime.value);
-        }, 1000);
-    };
+    }, [image, foodType, postDesc, expiresAt]);
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [5, 4],
+            aspect: [4, 3],
             quality: 1,
         });
 
@@ -106,39 +79,6 @@ const CreatePost = ({ navigation }) => {
 
         return url;
     };
-    const handleTimeColsed = (value) => {
-        const now = new Date();
-        const selectedDate = value;
-
-        if (selectedDate > now) {
-            setClosedTime({ value, valid: true });
-        } else {
-            setClosedTime({ value, valid: false });
-            Toast.show({
-                render: () => {
-                    return <TOAST status="error" msg="You closed already !" />;
-                },
-                duration: 2000,
-            });
-        }
-    };
-    const onChange = (selectedDate) => {
-        const currentDate = selectedDate;
-
-        if (currentDate.type !== "dismissed") {
-            const date = new Date(currentDate.nativeEvent.timestamp);
-
-            handleTimeColsed(date);
-        }
-    };
-    const showMode = () => {
-        DateTimePickerAndroid.open({
-            value: closedTime.value,
-            onChange,
-            mode: "time",
-            is24Hour: false,
-        });
-    };
     const HAS_ACTIVE_POST = async () => {
         let has = null;
         await $Posts_Ref
@@ -153,8 +93,7 @@ const CreatePost = ({ navigation }) => {
             });
         return has;
     };
-
-    const Publish = async (foodType, postDesc, closedTime, image) => {
+    const Publish = async (foodType, postDesc, image, expiresAt) => {
         if (done) {
             try {
                 setLoading(true);
@@ -179,8 +118,9 @@ const CreatePost = ({ navigation }) => {
                             const imgUrl = await uploadImage(image);
 
                             const timestamp = firestore.FieldValue.serverTimestamp();
+                            const $expiresAt = firestore.Timestamp.fromDate(expiresAt.value);
+
                             const now = firestore.Timestamp.now();
-                            const closedIn = firestore.Timestamp.fromDate(closedTime.value);
                             const $ReqData = {
                                 active: true,
                                 date: timestamp,
@@ -188,14 +128,11 @@ const CreatePost = ({ navigation }) => {
                                 foodType,
                                 foodTypeLower: foodType.toLocaleLowerCase(),
                                 postDesc,
-                                closedIn,
                                 id: data?.id,
                                 Name: data?.Name,
-                                address: data?.address,
-                                email: data?.email,
-                                location: data?.location,
-                                phone: data?.phone,
                                 photo: data?.photo,
+                                location: data?.location,
+                                expiresAt: $expiresAt,
                             };
                             //Save post to global posts
                             await $Posts_Ref.add($ReqData).then(async (newPost) => {
@@ -282,32 +219,13 @@ const CreatePost = ({ navigation }) => {
                         placeholderTextColor="#7a7a7a"
                         onChangeText={(txt) => setPostDesc(txt)}
                     />
-
-                    <TouchableHighlight
-                        style={{
-                            backgroundColor: closedTime.valid ? "#0ba469" : "#676767",
-                            height: 50,
-                            borderRadius: 7,
-                            justifyContent: "center",
-                            alignItems: "center",
-                        }}
-                        onPress={showMode}
-                        disabled={loading}
-                        underlayColor={closedTime.valid ? "#098d5a" : "#505050"}
-                    >
-                        <HStack alignItems={"center"}>
-                            <Ionicons name="time-outline" size={25} color="#fff" />
-                            <Text style={{ color: "#fff", fontSize: 16, marginLeft: 4 }}>
-                                {CONTENT.postClosedTime}
-                            </Text>
-                        </HStack>
-                    </TouchableHighlight>
+                    <PickTime time={setExpiresAt} loading={loading} closing={false} />
 
                     <View style={Styles.saveBtnCont}>
                         <TouchableOpacity
                             disabled={loading || !done}
                             style={[Styles.saveBtn, done && Styles.ActiveBtn]}
-                            onPress={() => Publish(foodType, postDesc, closedTime, image)}
+                            onPress={() => Publish(foodType, postDesc, image, expiresAt)}
                         >
                             {loading ? (
                                 <ActivityIndicator size={30} color="#fff" />
