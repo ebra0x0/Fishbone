@@ -12,8 +12,8 @@ const RootColor = () => {
         AVATAR: theme ? "#02234e" : "#b7b7b7",
         BORDER: theme ? "#001c3e" : "#cfcfcf",
         BUTTON: "#0065ff",
-        INPUT_TXT: theme ? "#3398ff" : "#252525",
-        SECONDARY_TXT: theme ? "#6e6e6e" : "#252525",
+        INPUT_TXT: theme ? "#3398ff" : "#343434",
+        SECONDARY_TXT: theme ? "#6e6e6e" : "#343434",
         ERR_TXT: "#ff4a4a",
         FOTTER_TXT: theme ? "#8f8f8f" : "#222222",
 
