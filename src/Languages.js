@@ -65,7 +65,7 @@ const Translations = () => {
             dashboardActivePost: "المنشور النشط",
             dashboardActivePostId: "معرف المنشور",
             dashboardActivePostCreatedAt: "تاريخ النشر",
-            ExpiresIn: "ينتهي في",
+            ExpiresAt: "ينتهي في",
             dashboardActivePostDetails: "تفاصيل",
             dashboardActivePostDelete: "حذف",
             dashboardStatsticsToday: "اليوم",
@@ -73,6 +73,7 @@ const Translations = () => {
             dashboardStatsticsTotal: "الإجمالي",
             dashboardStatsticsDeliverd: "تم التسليم",
             dashboardStatsticsCancled: "تم الرفض",
+            dashboardStatsticsTitle: "الإحصائيات",
             dashboardStatsticsPosts: "منشورات",
             dashboardStatsticsOrders: "طلبات",
             todayPosts: "منشورات اليوم",
@@ -97,8 +98,8 @@ const Translations = () => {
             notfDirections: "الاتجاهات",
             notfSubmit: "تأكيد الطلب",
 
-            PostSendBtn: "اطلبه الأن",
-
+            sendOrderBtn: "اطلبه الأن",
+            haveOrder: "لديك طلب معلق",
             settTitle: "الإعدادات",
             settVersion: "إصدار التطبيق",
             settLightTheme: "فاتح",
@@ -122,7 +123,8 @@ const Translations = () => {
             postTitle: "إنشاء منشور",
             postTypeFood: "ما نوع الطعام ؟",
             postFoodContains: "اوصف محتويات الطعام",
-            postClosedTime: "متى يغلق المطعم ؟",
+            ClosingTime: "متى يغلق المطعم ؟",
+            postExpiresAt: "حدد وقت إنتهاء الصلاحية",
             postCreateBtn: "إنشاء",
 
             confPhotoTitle: "صورة تأكيدية",
@@ -140,7 +142,7 @@ const Translations = () => {
             greetingDesc: "We provide support to reduce pollution and food waste,",
             greetingDescJoin: "Join Us",
             greetingSignIn: "Sign In",
-            greetingSignUp: "Sign Up",
+            greetingSignUp: "Create Account",
 
             signinTitle: "Welcome Back",
             signinDesc: "Lets login to your account",
@@ -192,7 +194,7 @@ const Translations = () => {
             dashboardActivePost: "Active Post",
             dashboardActivePostId: "Post Id",
             dashboardActivePostCreatedAt: "Created In",
-            ExpiresIn: "Expires In",
+            ExpiresAt: "Expires At",
             dashboardActivePostDetails: "Details",
             dashboardActivePostDelete: "Delete",
             dashboardStatsticsToday: "Todays",
@@ -200,6 +202,7 @@ const Translations = () => {
             dashboardStatsticsTotal: "Total",
             dashboardStatsticsDeliverd: "Deliverd",
             dashboardStatsticsCancled: "Cancled",
+            dashboardStatsticsTitle: "Statistics",
             dashboardStatsticsPosts: "Posts",
             dashboardStatsticsOrders: "Orders",
             todayPosts: "Today Posts",
@@ -224,7 +227,8 @@ const Translations = () => {
             notfDirections: "Directions",
             notfSubmit: "Submit Order",
 
-            PostSendBtn: "Pick Up Now",
+            sendOrderBtn: "Pick Up Now",
+            haveOrder: "You've an active order",
 
             settTitle: "Settings",
             settVersion: "Version",
@@ -249,7 +253,8 @@ const Translations = () => {
             postTitle: "Create Post",
             postTypeFood: "what kind of food ?",
             postFoodContains: "What this food contain ?",
-            postClosedTime: "Choose Closed Time",
+            ClosingTime: "Choose Closing Time",
+            postExpiresAt: "Choose expiration date",
             postCreateBtn: "Create",
 
             confPhotoTitle: "Confirmation Photo",
