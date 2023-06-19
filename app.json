@@ -51,13 +51,6 @@
                     "clientToken": "3249a79422f98cabe5b59f13c8bb7d6a",
                     "displayName": "Biteback"
                 }
-            ],
-            [
-                "expo-notifications",
-                {
-                    "icon": "./Local/notification-icon.png",
-                    "color": "#ffffff"
-                }
             ]
         ]
     }
