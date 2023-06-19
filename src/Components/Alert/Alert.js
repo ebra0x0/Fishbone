@@ -11,7 +11,7 @@ const Alert = (props) => {
     const navigation = useNavigation();
 
     const openMsg = (key) => {
-        navigation.navigate("notifications", { New: key });
+        navigation.navigate("notifications", { screen: "FlatlistOrders", params: { New: key } });
 
         props.close([]);
     };
