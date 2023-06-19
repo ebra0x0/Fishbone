@@ -4,7 +4,7 @@ import auth from "@react-native-firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import { isDevice } from "expo-device";
 import styles from "./styles";
-import TOAST from "../Toast/Toast";
+import TOAST from "../TOAST/TOAST";
 import { Toast } from "native-base";
 import Translations from "../../Languages";
 
@@ -78,22 +78,13 @@ const VirifyPhone = (props) => {
                         console.log(e);
                     });
                 setLoading(false);
-                if (confirmation.verificationId && confirmation.code) {
+                if (confirmation?.verificationId && confirmation?.code) {
                     verification.id && StartTimer();
                     setVerification({
                         id: confirmation.verificationId,
                         code: confirmation.code,
                         number: Pnumber,
                     });
-                } else {
-                    Toast.show({
-                        render: () => {
-                            return <TOAST status="error" msg="Verification code failed to sent!" />;
-                        },
-                        duration: 3000,
-                    });
-
-                    setLoading(false);
                 }
             } else {
                 Toast.show({

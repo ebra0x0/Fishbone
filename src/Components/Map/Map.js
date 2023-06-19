@@ -6,7 +6,7 @@ import { View, TouchableOpacity, Text, Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import * as Location from "expo-location";
 import { Ionicons } from "@expo/vector-icons";
-import TOAST from "../Toast/Toast";
+import TOAST from "../TOAST/TOAST";
 import { Toast } from "native-base";
 import Translations from "../../Languages";
 

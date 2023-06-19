@@ -20,7 +20,7 @@ import Avatar from "../../Components/Avatar/Avatar";
 import { useEffect } from "react";
 import Translations from "../../Languages";
 import { Toast } from "native-base";
-import TOAST from "../../Components/Toast/Toast";
+import TOAST from "../../Components/TOAST/TOAST";
 
 export default () => {
     const Styles = styles();
@@ -227,7 +227,7 @@ export default () => {
                                 )}
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={SignOut}>
+                            <TouchableOpacity onPress={SignOut} disabled={loadingSignOut}>
                                 {loadingSignOut ? (
                                     <ActivityIndicator size={25} color="#ff7762" />
                                 ) : (

@@ -6,7 +6,7 @@ import styles from "./styles";
 import Translations from "../../Languages";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import { Toast } from "native-base";
-import TOAST from "../../Components/Toast/Toast";
+import TOAST from "../../Components/TOAST/TOAST";
 
 const Reset_Pass = ({ navigation }) => {
     const Styles = styles();

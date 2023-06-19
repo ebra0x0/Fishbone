@@ -46,7 +46,7 @@ const ScreenHeader = (props) => {
                         navigation.goBack();
                     }}
                 >
-                    <Ionicons name="arrow-back" size={30} color={theme ? "#fff" : "#252525"} />
+                    <Ionicons name="arrow-back" size={30} color={theme ? "#fff" : "#343434"} />
                 </TouchableOpacity>
             )}
 
@@ -56,7 +56,7 @@ const ScreenHeader = (props) => {
                         flex: 1,
                         marginLeft: 6,
                         fontSize: 30,
-                        color: theme ? "#fff" : "#252525",
+                        color: theme ? "#fff" : "#343434",
                         fontWeight: "bold",
                         textAlign: "left",
                     }}
@@ -66,7 +66,7 @@ const ScreenHeader = (props) => {
             )}
             {component && component}
 
-            {Buttons && <View style={{ flexDirection: "row" }}>{Buttons}</View>}
+            {Buttons && <View style={{ flexDirection: "row", alignItems: "center" }}>{Buttons}</View>}
         </View>
     );
 };

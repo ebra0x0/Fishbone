@@ -134,7 +134,7 @@ export default () => {
                     })
                     .catch(() => {
                         setLoading(false);
-                        setErrMsg("Incorrect Email or Password");
+                        setErrMsg("Sorry,We're having trouble logging you in");
                     });
             } catch (e) {
                 setLoading(false);
