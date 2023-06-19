@@ -6,11 +6,10 @@ import storage from "@react-native-firebase/storage";
 import { useDispatch, useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import RootColor from "../../RootColor";
+import { Skeleton } from "native-base";
 
 const Avatar = (props) => {
-    const Root = RootColor();
-    const { data } = useSelector((state) => state.user);
+    const { data, theme } = useSelector((state) => state.user);
     const [image, setImage] = useState(data?.photo);
 
     const { upload, disabled, profile, style } = props;
@@ -63,7 +62,6 @@ const Avatar = (props) => {
             <View
                 style={[
                     {
-                        backgroundColor: Root.AVATAR,
                         overflow: "hidden",
                         justifyContent: "center",
                         alignItems: "center",
@@ -73,10 +71,16 @@ const Avatar = (props) => {
             >
                 {profile?.data || image ? (
                     profile?.data?.photo || image ? (
-                        <Image
-                            style={{ width: "100%", height: "100%" }}
-                            source={{ uri: profile?.data ? profile.data?.photo : image || !data?.photo }}
-                        />
+                        <Skeleton
+                            size={style.width}
+                            startColor={theme ? "darkBlue.800" : "darkBlue.100"}
+                            isLoaded={profile?.data?.photo || image}
+                        >
+                            <Image
+                                style={{ width: "100%", height: "100%" }}
+                                source={{ uri: profile?.data ? profile.data?.photo : image || !data?.photo }}
+                            />
+                        </Skeleton>
                     ) : (
                         <Ionicons name="person" size={style?.width / 2 || 20} color="#2ebeff" />
                     )
