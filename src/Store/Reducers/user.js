@@ -46,6 +46,7 @@ export const User = createSlice({
         favorites: [],
         Token: "",
         deviceLocation: null,
+        currentLocation: "home",
         hasUnconfirmedOrder: { has: null, orderId: "" },
     },
     reducers: {
@@ -60,7 +61,11 @@ export const User = createSlice({
                 ...state,
                 data: null,
                 userPost: null,
-                userOrder: null,
+                PendingOrder: null,
+                favorites: [],
+                Token: "",
+                currentLocation: "home",
+                hasUnconfirmedOrder: { has: null, orderId: "" },
             };
         },
         Set_User_Post: (state, action) => {
@@ -133,6 +138,18 @@ export const User = createSlice({
             return {
                 ...state,
                 deviceLocation: null,
+            };
+        },
+        Set_Current_Location: (state, action) => {
+            return {
+                ...state,
+                currentLocation: action.payload,
+            };
+        },
+        Del_Current_Location: (state) => {
+            return {
+                ...state,
+                currentLocation: "home",
             };
         },
         Set_ConfirmationPhoto: (state, action) => {
