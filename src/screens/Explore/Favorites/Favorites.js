@@ -8,7 +8,7 @@ import Translations from "../../../Languages";
 import { Toast } from "native-base";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import Avatar from "../../../Components/Avatar/Avatar";
-import TOAST from "../../../Components/Toast/Toast";
+import TOAST from "../../../Components/TOAST/TOAST";
 
 const Favorites = ({ navigation }) => {
     const Styles = styles();
@@ -83,14 +83,17 @@ const Favorites = ({ navigation }) => {
                         pressedItem === item.id ? AnimStyle : pressedItem === "all" ? AnimStyle : false,
                     ]}
                 >
-                    <View style={{ flex: 1, flexDirection: "row" }}>
-                        <Avatar profile={{ data: item }} style={Styles.avatar} />
-                        <Text style={{ fontSize: 16, color: theme ? "#fff" : "#252525", marginLeft: 6 }}>
+                    <View style={{ flexDirection: "column", alignItems: "center" }}>
+                        <Avatar
+                            profile={{ data: { id: item.id, photo: item.photo, Name: item.Name } }}
+                            style={Styles.avatar}
+                        />
+                        <Text style={{ fontSize: 16, color: theme ? "#fff" : "#343434", marginLeft: 6 }}>
                             {item.Name}
                         </Text>
                     </View>
                     <TouchableOpacity
-                        style={{ alignSelf: "center" }}
+                        style={{ flex: 1, alignSelf: "center", alignItems: "flex-end" }}
                         onPress={() => Dis_Fav(item.id, item.id)}
                     >
                         <Ionicons name="heart" size={30} color="#FF2763" />
@@ -106,9 +109,8 @@ const Favorites = ({ navigation }) => {
         {
             show: FAVORITES.length ? true : false,
             key: 1,
-            name: "heart-dislike-outline",
+            name: require("../../../../assets/brokenHeart.png"),
             size: 30,
-            color: "#dd4c35",
             fun: () => Dis_All(),
         },
     ];
@@ -117,7 +119,7 @@ const Favorites = ({ navigation }) => {
         if (btn.show) {
             return (
                 <TouchableOpacity style={{ marginLeft: 15 }} key={btn.key} onPress={() => btn.fun()}>
-                    <Ionicons name={btn.name} size={btn.size} color={btn.color} />
+                    <Image style={{ width: btn.size, height: btn.size }} source={btn.name} />
                 </TouchableOpacity>
             );
         }
