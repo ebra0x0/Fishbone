@@ -9,11 +9,21 @@ import mapStyle from "../../Components/Map/mapStyle";
 import ScreenHeader from "../../Components/ScreenHeader/ScreenHeader";
 import Avatar from "../../Components/Avatar/Avatar";
 import GetDirections from "../../Components/GetDirections";
+import firestore from "@react-native-firebase/firestore";
+import { Skeleton } from "native-base";
+import { Image } from "react-native";
 
 const OpenProfile = ({ route }) => {
     const Styles = styles();
     const { data, theme, favorites } = useSelector((state) => state.user);
-    const Data = route.params;
+    const [Data, setData] = useState({
+        Name: "",
+        address: "",
+        phone: "",
+        photo: "",
+        email: "",
+        location: null,
+    });
     const [isFav, setIsFav] = useState(null);
     const _AnimScale = useSharedValue(1);
     const AnimStyle = useAnimatedStyle(() => {
@@ -25,8 +35,11 @@ const OpenProfile = ({ route }) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        Fav_Detector(Data.id);
+        FetchUserData(route.params.id);
     }, []);
+    useEffect(() => {
+        Data.id && Fav_Detector(Data.id);
+    }, [Data]);
     useEffect(() => {
         if (isFav) {
             _AnimScale.value = withSpring(0.7, {}, (end) => {
@@ -37,6 +50,11 @@ const OpenProfile = ({ route }) => {
         }
     }, [isFav]);
 
+    const FetchUserData = async (id) => {
+        const UserData = (await firestore().collection("users").doc(id).get()).data();
+
+        setData(UserData);
+    };
     const Fav_Detector = (source) => {
         if (favorites.length) {
             let done = false;
@@ -114,9 +132,10 @@ const OpenProfile = ({ route }) => {
         {
             show: !data?.restaurant,
             key: 1,
-            name: isFav ? "heart" : "heart-outline",
-            size: 30,
-            color: "#FF2763",
+            name: isFav
+                ? require("../../../assets/heart-favorite.png")
+                : require("../../../assets/heart-outline.png"),
+            size: 35,
             fun: Toggle_Fav,
         },
     ];
@@ -126,7 +145,7 @@ const OpenProfile = ({ route }) => {
             return (
                 <Animated.View key={btn.key} style={[{ marginLeft: 15 }, AnimStyle]}>
                     <TouchableOpacity onPress={() => btn.fun()}>
-                        <Ionicons name={btn.name} size={btn.size} color={btn.color} />
+                        <Image style={{ width: btn.size, height: btn.size }} source={btn.name} />
                     </TouchableOpacity>
                 </Animated.View>
             );
@@ -135,7 +154,7 @@ const OpenProfile = ({ route }) => {
 
     return (
         <View style={Styles.container}>
-            <ScreenHeader arrow={true} title={Data.Name} btns={HeaderButtons} />
+            <ScreenHeader arrow={true} title={route.params.Name || Data.Name} btns={HeaderButtons} />
 
             <View
                 style={{
@@ -144,93 +163,120 @@ const OpenProfile = ({ route }) => {
                     height: 200,
                 }}
             >
-                <Avatar profile={{ data: { photo: Data.photo } }} style={Styles.avatar} disabled={true} />
+                <Skeleton
+                    startColor={theme ? "darkBlue.800" : "darkBlue.100"}
+                    size="150"
+                    rounded="full"
+                    isLoaded={route.params.photo || Data.photo}
+                >
+                    <Avatar
+                        profile={{ data: { photo: route.params.photo || Data.photo } }}
+                        style={Styles.avatar}
+                        disabled={true}
+                    />
+                </Skeleton>
             </View>
 
             <View style={Styles.wrapper}>
-                <TouchableOpacity
-                    style={Styles.row}
-                    onPress={() => GetDirections(Data?.id)}
-                    disabled={!Data?.id}
+                <Skeleton
+                    style={{ width: "100%", height: 50, marginBottom: 8, borderRadius: 5 }}
+                    isLoaded={Data.address}
+                    startColor={theme ? "darkBlue.800" : "darkBlue.100"}
                 >
-                    <Ionicons
-                        style={Styles.label}
-                        name="compass-outline"
-                        size={25}
-                        color={theme ? "#1f5eab" : "#1785f5"}
-                    />
-                    <Text style={Styles.txtRows} selectable={true}>
-                        {Data.address}
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={Styles.row}
-                    onPress={() => openPhoneApp(Data?.phone)}
-                    disabled={!Data?.phone}
+                    <TouchableOpacity
+                        style={Styles.row}
+                        onPress={() => GetDirections(Data.id)}
+                        disabled={!Data.id}
+                    >
+                        <Ionicons
+                            style={Styles.label}
+                            name="compass-outline"
+                            size={25}
+                            color={theme ? "#1f5eab" : "#1785f5"}
+                        />
+                        <Text style={Styles.txtRows} selectable={true}>
+                            {Data.address}
+                        </Text>
+                    </TouchableOpacity>
+                </Skeleton>
+                <Skeleton
+                    style={{ width: "100%", height: 50, marginBottom: 8, borderRadius: 5 }}
+                    isLoaded={Data.address}
+                    startColor={theme ? "darkBlue.800" : "darkBlue.100"}
                 >
-                    <Ionicons
-                        style={Styles.label}
-                        name="call-outline"
-                        size={23}
-                        color={theme ? "#1f5eab" : "#1785f5"}
-                    />
-                    <Text style={Styles.txtRows} selectable={true}>
-                        {Data.phone}
-                    </Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={Styles.row}
+                        onPress={() => openPhoneApp(Data.phone)}
+                        disabled={!Data.phone}
+                    >
+                        <Ionicons
+                            style={Styles.label}
+                            name="call-outline"
+                            size={23}
+                            color={theme ? "#1f5eab" : "#1785f5"}
+                        />
+                        <Text style={Styles.txtRows} selectable={true}>
+                            {Data.phone}
+                        </Text>
+                    </TouchableOpacity>
+                </Skeleton>
 
-                <TouchableOpacity
-                    style={Styles.row}
-                    onPress={() => openMailApp(Data?.email)}
-                    disabled={!Data?.email}
+                <Skeleton
+                    style={{ width: "100%", height: 50, marginBottom: 8, borderRadius: 5 }}
+                    isLoaded={Data.address}
+                    startColor={theme ? "darkBlue.800" : "darkBlue.100"}
                 >
-                    <Ionicons
-                        style={Styles.label}
-                        name="mail-outline"
-                        size={23}
-                        color={theme ? "#1f5eab" : "#1785f5"}
-                    />
-                    <Text style={Styles.txtRows} selectable={true}>
-                        {Data.email}
-                    </Text>
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        style={Styles.row}
+                        onPress={() => openMailApp(Data.email)}
+                        disabled={!Data.email}
+                    >
+                        <Ionicons
+                            style={Styles.label}
+                            name="mail-outline"
+                            size={23}
+                            color={theme ? "#1f5eab" : "#1785f5"}
+                        />
+                        <Text style={Styles.txtRows} selectable={true}>
+                            {Data.email}
+                        </Text>
+                    </TouchableOpacity>
+                </Skeleton>
 
                 <View style={Styles.mapContainer}>
-                    {Data.location ? (
-                        <>
-                            <MapView
-                                style={{ height: 140, backgroundColor: "#1e1e1e" }}
-                                region={Data.location}
-                                provider={PROVIDER_GOOGLE}
-                                customMapStyle={mapStyle}
-                                loadingEnabled={true}
-                                loadingBackgroundColor={Styles.mapView.backgroundColor}
-                                loadingIndicatorColor="#1785f5"
-                            >
-                                <Marker coordinate={Data.location}>
-                                    <Ionicons name="location" size={50} color="#18ad79" />
-                                </Marker>
-                            </MapView>
-                            <TouchableOpacity
-                                style={{
-                                    position: "absolute",
-                                    bottom: 6,
-                                    right: 6,
-                                    backgroundColor: "#eee",
-                                    padding: 5,
-                                    borderRadius: 4,
-                                }}
-                                activeOpacity={0.8}
-                                onPress={() => GetDirections(Data.id)}
-                            >
-                                <Ionicons name="arrow-redo" size={20} color="#1e1e1e" />
-                            </TouchableOpacity>
-                        </>
-                    ) : (
-                        <View style={Styles.mapView}>
-                            <Text style={Styles.txtView}>Location not found</Text>
-                        </View>
-                    )}
+                    <Skeleton
+                        style={{ height: 140 }}
+                        isLoaded={Data.location}
+                        startColor={theme ? "darkBlue.800" : "darkBlue.100"}
+                    >
+                        <MapView
+                            style={{ height: 140, backgroundColor: "#1e1e1e" }}
+                            region={Data.location}
+                            provider={PROVIDER_GOOGLE}
+                            customMapStyle={mapStyle}
+                            loadingEnabled={true}
+                            loadingBackgroundColor={Styles.mapView.backgroundColor}
+                            loadingIndicatorColor="#1785f5"
+                        >
+                            <Marker coordinate={Data.location}>
+                                <Ionicons name="location" size={50} color="#18ad79" />
+                            </Marker>
+                        </MapView>
+                        <TouchableOpacity
+                            style={{
+                                position: "absolute",
+                                bottom: 6,
+                                right: 6,
+                                backgroundColor: "#eee",
+                                padding: 5,
+                                borderRadius: 4,
+                            }}
+                            activeOpacity={0.8}
+                            onPress={() => GetDirections(Data.id)}
+                        >
+                            <Ionicons name="arrow-redo" size={20} color="#1e1e1e" />
+                        </TouchableOpacity>
+                    </Skeleton>
                 </View>
                 {Data.social && (
                     <View
@@ -241,7 +287,7 @@ const OpenProfile = ({ route }) => {
                             height: 30,
                         }}
                     >
-                        {Data?.social.fb && (
+                        {Data.social.fb && (
                             <TouchableOpacity
                                 style={{ flex: 1, alignItems: "center" }}
                                 onPress={() => Open_Social("fb")}
@@ -249,7 +295,7 @@ const OpenProfile = ({ route }) => {
                                 <Ionicons name="logo-facebook" size={25} color={theme ? "#fff" : "#3e3e3e"} />
                             </TouchableOpacity>
                         )}
-                        {Data?.social.tw && (
+                        {Data.social.tw && (
                             <TouchableOpacity
                                 style={{ flex: 1, alignItems: "center" }}
                                 onPress={() => Open_Social("tw")}
@@ -257,7 +303,7 @@ const OpenProfile = ({ route }) => {
                                 <Ionicons name="logo-twitter" size={25} color={theme ? "#fff" : "#3e3e3e"} />
                             </TouchableOpacity>
                         )}
-                        {Data?.social.inst && (
+                        {Data.social.inst && (
                             <TouchableOpacity
                                 style={{ flex: 1, alignItems: "center" }}
                                 onPress={() => Open_Social("inst")}
@@ -270,7 +316,7 @@ const OpenProfile = ({ route }) => {
                             </TouchableOpacity>
                         )}
 
-                        {Data?.social.web && (
+                        {Data.social.web && (
                             <TouchableOpacity
                                 style={{ flex: 1, alignItems: "center" }}
                                 onPress={() => Open_Social("web")}
