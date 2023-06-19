@@ -10,6 +10,7 @@ import SearchBar from "../../../Components/SearchBar/SearchBar";
 import ScreenHeader from "../../../Components/ScreenHeader/ScreenHeader";
 import Avatar from "../../../Components/Avatar/Avatar";
 import SendOrder from "../../../Components/SendOrder";
+import firestore from "@react-native-firebase/firestore";
 
 const Search = () => {
     const Styles = styles();
@@ -34,7 +35,7 @@ const Search = () => {
     });
 
     const CONTENT = {
-        ExpiresIn: Translations().t("ExpiresIn"),
+        ExpiresAt: Translations().t("ExpiresAt"),
         searchFound: Translations().t("searchFound"),
         searchResult: Translations().t("searchResult"),
         serachFood: Translations().t("serachFood"),
@@ -42,6 +43,12 @@ const Search = () => {
     };
 
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        setResults([]);
+        searchType === "food" && AnimateTo(0);
+        searchType === "restaurant" && AnimateTo(ScreenX / 2);
+    }, [searchType]);
 
     const AnimateTo = (value) => {
         _AntScale.value = withTiming(0.5, { duration: 100 }, (end) => {
@@ -56,7 +63,6 @@ const Search = () => {
         });
         _AntMove.value = withSpring(value, { mass: 0.5, damping: 10 });
     };
-
     const Fav_Detector = (source) => {
         let isFav = null;
         if (favorites.length) {
@@ -70,7 +76,6 @@ const Search = () => {
         }
         return isFav !== null && isFav;
     };
-
     const Toggle_Fav = (item, isFav) => {
         try {
             const favData = {
@@ -99,42 +104,10 @@ const Search = () => {
             console.log(e);
         }
     };
-
-    const __Get_Expired_Date__ = (date) => {
-        const $Date = new Date(date?.toDate());
-        console.log($Date);
-        if (!$Date) {
-            return "";
-        }
-
-        if (!($Date instanceof Date && !isNaN($Date))) {
-            return lang === "en" ? "Invalid date" : "تاريخ غير صالح";
-        }
-
-        const currDate = new Date();
-        const elapsedTime = $Date - currDate;
-
-        if (elapsedTime < 0) {
-            return lang === "en" ? "Expired" : "انتهى";
-        }
-
-        const elapsedDays = Math.floor(elapsedTime / (1000 * 60 * 60 * 24));
-        if (elapsedDays > 0) {
-            return elapsedDays + (lang === "en" ? "d" : "ي");
-        }
-
-        const timeStr = $Date.toLocaleTimeString(undefined, {
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-        });
-
-        return timeStr;
-    };
-
     const __Get_Elapsed__ = (date) => {
         if (date) {
-            const currDate = new Date();
+            const Timestamp = firestore.Timestamp.now();
+            const currDate = new Date(Timestamp.toDate());
             const start = new Date(date?.toDate());
             const elapsedTime = currDate - start;
 
@@ -159,15 +132,29 @@ const Search = () => {
             return "";
         }
     };
+    const Remove_Pending_Order = async (id) => {
+        try {
+            const $UsersRef = firestore().collection("users");
+            //Remove order from restaurant
+            await $UsersRef.doc(id).collection("orders").doc(PendingOrder.id).delete();
 
+            // Remove order from local orders
+            await $UsersRef.doc(data?.id).collection("orders").doc(PendingOrder.id).delete();
+        } catch (e) {
+            console.log(e);
+        }
+    };
     const renderFoodItems = ({ item }) => {
-        const { id, key, Name, closedIn, foodType, date } = item;
+        const { id, key, Name, foodType, date, expiresAt } = item;
         const isFav = Fav_Detector(id);
 
         return (
             <TouchableOpacity style={Styles.row} onPress={() => navigation.navigate("PostInfo", item)}>
                 <View style={{ flex: 1 }}>
-                    <Avatar profile={{ data: item }} style={Styles.avatar} />
+                    <Avatar
+                        profile={{ data: { id: item.id, photo: item.photo, Name: item.Name } }}
+                        style={Styles.avatar}
+                    />
                 </View>
 
                 <View style={Styles.contentWrapper}>
@@ -179,14 +166,15 @@ const Search = () => {
 
                         <View>
                             <Text style={Styles.expDate}>
-                                {CONTENT.ExpiresIn}{" "}
+                                {CONTENT.ExpiresAt}{" "}
                                 <Text style={{ color: "#FF2763", fontWeight: "bold" }}>
-                                    {__Get_Expired_Date__(closedIn)}
+                                    {expiresAt?.toDate().toLocaleTimeString().slice(0, -6)}{" "}
+                                    {expiresAt?.toDate().toLocaleTimeString().slice(-2)}
                                 </Text>
                             </Text>
                         </View>
 
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Ionicons name="time-outline" size={12} color="#1785f5" />
                             <Text style={Styles.date}>{__Get_Elapsed__(date)}</Text>
                         </View>
@@ -202,11 +190,18 @@ const Search = () => {
 
                         {!PendingOrder ? (
                             <TouchableOpacity
-                                style={Styles.btn}
+                                style={[Styles.btn, { backgroundColor: "#0dbc7933" }]}
                                 onPress={() =>
                                     SendOrder({
-                                        item: { id: id, key: key },
-                                        userId: data?.id,
+                                        item: {
+                                            source: data?.id,
+                                            dest: id,
+                                            key: key,
+                                            Name: data?.Name,
+                                            Token: data?.Token,
+                                            photo: data?.photo,
+                                            expiresAt: expiresAt.toDate(),
+                                        },
                                         loading: setLoadingBtn,
                                     })
                                 }
@@ -214,14 +209,17 @@ const Search = () => {
                                 {loadingBtn ? (
                                     <ActivityIndicator size={25} color="#0dbc79" />
                                 ) : (
-                                    <MaterialCommunityIcons name="plus" size={25} color={"#0dbc79"} />
+                                    <MaterialCommunityIcons name="send-outline" size={20} color={"#0dbc79"} />
                                 )}
                             </TouchableOpacity>
                         ) : (
-                            PendingOrder?.postId == item.key && (
-                                <View style={Styles.btn}>
-                                    <Ionicons name="checkmark-outline" size={25} color="#0dbc79" />
-                                </View>
+                            PendingOrder?.postId == key && (
+                                <TouchableOpacity
+                                    style={[Styles.btn, { backgroundColor: "#ff276333" }]}
+                                    onPress={() => Remove_Pending_Order(id)}
+                                >
+                                    <Ionicons name="close" size={25} color="#FF2763" />
+                                </TouchableOpacity>
                             )
                         )}
                     </View>
@@ -232,9 +230,17 @@ const Search = () => {
     const renderRestaurantItems = ({ item }) => {
         const isFav = Fav_Detector(item.id);
         return (
-            <TouchableOpacity style={Styles.row} onPress={() => navigation.navigate("OpenProfile", item)}>
+            <TouchableOpacity
+                style={Styles.row}
+                onPress={() =>
+                    navigation.navigate("OpenProfile", { id: item.id, photo: item.photo, Name: item.Name })
+                }
+            >
                 <View style={{ flex: 1 }}>
-                    <Avatar profile={{ data: item }} style={Styles.avatar} />
+                    <Avatar
+                        profile={{ data: { id: item.id, photo: item.photo, Name: item.Name } }}
+                        style={Styles.avatar}
+                    />
                 </View>
 
                 <View style={Styles.contentWrapper}>
@@ -257,11 +263,6 @@ const Search = () => {
         );
     };
 
-    useEffect(() => {
-        setResults([]);
-        searchType === "food" && AnimateTo(0);
-        searchType === "restaurant" && AnimateTo(ScreenX / 2);
-    }, [searchType]);
     return (
         <View style={Styles.container}>
             <ScreenHeader
