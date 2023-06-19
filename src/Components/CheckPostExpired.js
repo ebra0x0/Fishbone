@@ -1,17 +1,16 @@
 import firestore from "@react-native-firebase/firestore";
 
-const Check_Post_Expired = async (postKey) => {
+const Check_Post_Expired = async (postKey, expiresAt) => {
     const $Posts_Ref = firestore().collection("posts");
+    const Post = await $Posts_Ref.doc(postKey).get();
 
-    const closedIn = await $Posts_Ref
-        .doc(postKey)
-        .get()
-        .then((post) => post.data().closedIn);
+    if (!Post.exists) {
+        return true;
+    }
 
-    const now = new Date(Date.now());
-    const exDate = new Date(closedIn?.toDate());
+    const Timestamp = firestore.Timestamp.now().toDate();
 
-    if (exDate.getTime() <= now.getTime()) {
+    if (expiresAt <= Timestamp) {
         return true;
     } else {
         return false;
