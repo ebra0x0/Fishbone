@@ -1,51 +1,36 @@
 import React, { useState, memo } from "react";
 import { View, Text, Image, TouchableOpacity, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import styles from "./styles";
 import Translations from "../../Languages";
 import SendOrder from "../../Components/SendOrder";
+import firestore from "@react-native-firebase/firestore";
 
 const PostInfo = ({ route, navigation }) => {
-    const { data, lang, theme, PendingOrder } = useSelector((state) => state.user);
-    const { id, postImage, photo, Name, date, closedIn, foodType, postDesc, key } = route.params;
+    const { data, theme, PendingOrder } = useSelector((state) => state.user);
+    const { id, postImage, photo, Name, date, expiresAt, foodType, postDesc, distance, key } = route.params;
+
     const [loading, setLoading] = useState(false);
     const Styles = styles();
 
+    const $UsersRef = firestore().collection("users");
     const CONTENT = {
-        PostSendBtn: Translations().t("PostSendBtn"),
-        ExpiresIn: Translations().t("ExpiresIn"),
+        sendOrderBtn: Translations().t("sendOrderBtn"),
+        ExpiresAt: Translations().t("ExpiresAt"),
+        haveOrder: Translations().t("haveOrder"),
     };
 
-    const __Get_Expired_Date__ = (date) => {
-        const $Date = new Date(date?.toDate());
-        if (!$Date) {
-            return "";
+    const Remove_Pending_Order = async () => {
+        try {
+            //Remove order from restaurant
+            await $UsersRef.doc(id).collection("orders").doc(PendingOrder.id).delete();
+
+            // Remove order from local orders
+            await $UsersRef.doc(data?.id).collection("orders").doc(PendingOrder.id).delete();
+        } catch (e) {
+            console.log(e);
         }
-
-        if (!($Date instanceof Date && !isNaN($Date))) {
-            return lang === "en" ? "Invalid date" : "تاريخ غير صالح";
-        }
-
-        const currDate = new Date();
-        const elapsedTime = $Date - currDate;
-
-        if (elapsedTime < 0) {
-            return lang === "en" ? "Expired" : "انتهى";
-        }
-
-        const elapsedDays = Math.floor(elapsedTime / (1000 * 60 * 60 * 24));
-        if (elapsedDays > 0) {
-            return elapsedDays + (lang === "en" ? "d" : "ي");
-        }
-
-        const timeStr = $Date.toLocaleTimeString(undefined, {
-            hour: "numeric",
-            minute: "numeric",
-            hour12: true,
-        });
-
-        return timeStr;
     };
 
     return (
@@ -65,16 +50,29 @@ const PostInfo = ({ route, navigation }) => {
 
             <View style={Styles.wrapper}>
                 <View style={Styles.postData}>
-                    <View style={Styles.row}>
-                        <Ionicons name="time-outline" size={18} color="#7a7a7a" />
-                        <Text style={{ fontSize: 16, color: theme ? "#fff" : "#252525", marginLeft: 3 }}>
-                            {date.toDate().toDateString()}
-                        </Text>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                        <View style={Styles.row}>
+                            <Ionicons name="time-outline" size={18} color="#7a7a7a" />
+                            <Text style={{ fontSize: 16, color: theme ? "#fff" : "#343434", marginLeft: 3 }}>
+                                {date.toDate().toDateString()}
+                            </Text>
+                        </View>
+                        {!data?.restaurant && (
+                            <View style={{ flexDirection: "row" }}>
+                                <MaterialCommunityIcons
+                                    name="navigation-variant-outline"
+                                    size={15}
+                                    color="#2ebeff"
+                                />
+                                <Text style={{ color: "#4bbc83", fontSize: 14 }}>{distance}</Text>
+                            </View>
+                        )}
                     </View>
                     <Text style={Styles.expDate}>
-                        {CONTENT.ExpiresIn}{" "}
+                        {CONTENT.ExpiresAt}{" "}
                         <Text style={{ color: "#FF2763", fontWeight: "bold" }}>
-                            {__Get_Expired_Date__(closedIn)}
+                            {expiresAt.toDate().toLocaleTimeString().slice(0, -6)}{" "}
+                            {expiresAt.toDate().toLocaleTimeString().slice(-2)}
                         </Text>
                     </Text>
                 </View>
@@ -92,8 +90,15 @@ const PostInfo = ({ route, navigation }) => {
                         disabled={loading}
                         onPress={() =>
                             SendOrder({
-                                item: { id: id, key: key },
-                                userId: data?.id,
+                                item: {
+                                    source: data?.id,
+                                    dest: id,
+                                    key: key,
+                                    Name: data?.Name,
+                                    Token: data?.Token,
+                                    photo: data?.photo,
+                                    expiresAt: expiresAt.toDate(),
+                                },
                                 loading: setLoading,
                             })
                         }
@@ -101,15 +106,20 @@ const PostInfo = ({ route, navigation }) => {
                         {loading ? (
                             <ActivityIndicator size={30} color="#fff" />
                         ) : (
-                            <Text style={{ fontSize: 16, color: "#fff" }}>{CONTENT.PostSendBtn}</Text>
+                            <Text style={{ fontSize: 16, color: "#fff" }}>{CONTENT.sendOrderBtn}</Text>
                         )}
                     </TouchableOpacity>
+                ) : !PendingOrder?.postId == key ? (
+                    <TouchableOpacity
+                        style={[Styles.btn, { backgroundColor: "#ff27631a" }]}
+                        onPress={Remove_Pending_Order}
+                    >
+                        <Ionicons name="close" size={25} color="#FF2763" />
+                    </TouchableOpacity>
                 ) : (
-                    PendingOrder?.postId == key && (
-                        <View style={[Styles.btn, { backgroundColor: "#0dbc7912" }]}>
-                            <Ionicons name="checkmark-outline" size={20} color="#0dbc79" />
-                        </View>
-                    )
+                    <View style={[Styles.btn, { backgroundColor: "#0065ff1a" }]}>
+                        <Text style={Styles.txt}>{CONTENT.haveOrder}</Text>
+                    </View>
                 ))}
         </View>
     );
