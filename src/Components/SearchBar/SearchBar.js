@@ -4,9 +4,10 @@ import firestore from "@react-native-firebase/firestore";
 import { useSelector } from "react-redux";
 import Translations from "../../Languages";
 import { Ionicons } from "@expo/vector-icons";
+import { getDistance } from "geolib";
 
 const SearchBar = (props) => {
-    const { theme } = useSelector((state) => state.user);
+    const { theme, data, currentLocation, deviceLocation } = useSelector((state) => state.user);
     const [srchValue, setSrchValue] = useState("");
     const [focus, setFocus] = useState(false);
     const [results, setResults] = useState([]);
@@ -19,15 +20,33 @@ const SearchBar = (props) => {
         props.searchType === "restaurant" && restaurantSearch(srchValue);
     }, [srchValue]);
     useEffect(() => {
-        setResults([]);
         props.searchType === "food" && foodSearch(srchValue);
         props.searchType === "restaurant" && restaurantSearch(srchValue);
     }, [props.searchType]);
     useEffect(() => {
-        props.loading(false);
         props.update(results);
+        props.loading(false);
     }, [results]);
 
+    const __Get_Distance__ = (restGeo) => {
+        let distance = 0;
+
+        if (currentLocation === "current") {
+            distance = getDistance(deviceLocation, restGeo, 1);
+        } else {
+            distance = getDistance(data?.location, restGeo, 1);
+        }
+
+        if (distance / 1000 < 99) {
+            if (distance > 1000) {
+                return (distance / 1000).toPrecision(2) + " Km";
+            } else {
+                return distance + " m";
+            }
+        } else {
+            return "+99 Km";
+        }
+    };
     const foodSearch = (value) => {
         if (value) {
             props.loading(true);
@@ -41,7 +60,11 @@ const SearchBar = (props) => {
                     const matching = [];
 
                     query.forEach((post) => {
-                        matching.push({ ...post.data(), key: post.id });
+                        matching.push({
+                            ...post.data(),
+                            distance: __Get_Distance__(post.data().location),
+                            key: post.id,
+                        });
                     });
 
                     setResults(matching);
