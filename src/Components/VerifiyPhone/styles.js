@@ -10,7 +10,6 @@ const styles = () => {
             backgroundColor: Root.VIEW,
             overflow: "hidden",
             borderRadius: 5,
-            marginVertical: 7,
         },
         input: {
             width: "100%",
@@ -28,7 +27,7 @@ const styles = () => {
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: Root.VIEW_SHADOW,
-            borderRadius: 5,
+            borderRadius: 6,
         },
         err: {
             color: Root.ERR_TXT,

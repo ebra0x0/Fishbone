@@ -3,7 +3,6 @@ import RootColor from "../../../RootColor";
 import { useSelector } from "react-redux";
 
 const styles = () => {
-    const { theme } = useSelector((state) => state.user);
     const Root = RootColor();
 
     return StyleSheet.create({

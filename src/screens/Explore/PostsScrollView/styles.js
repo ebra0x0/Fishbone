@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import RootColor from "../../RootColor";
+import RootColor from "../../../RootColor";
 
 const styles = () => {
     const Root = RootColor();
@@ -12,16 +12,17 @@ const styles = () => {
         },
         scrollView: {
             paddingHorizontal: 10,
+            marginBottom: 20,
         },
         flatList: {
-            marginBottom: 20,
+            marginVertical: 8,
         },
         postsHeader: {
             textAlign: "left",
             fontSize: 22,
             fontWeight: "bold",
             color: Root.VIEW_TXT,
-            marginTop: 20,
+            marginBottom: 4,
         },
         post: {
             width: 280,

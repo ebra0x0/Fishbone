@@ -17,7 +17,8 @@ const styles = () => {
         row: {
             flexDirection: "row",
             backgroundColor: Root.VIEW,
-            padding: 15,
+            paddingVertical: 10,
+            paddingHorizontal: 20,
             borderRadius: 8,
             marginBottom: 10,
             elevation: 5,

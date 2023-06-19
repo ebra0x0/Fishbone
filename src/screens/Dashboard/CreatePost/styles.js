@@ -19,7 +19,7 @@ const styles = () => {
         },
         pickImageBtn: {
             width: "100%",
-            height: 150,
+            height: 180,
             justifyContent: "center",
             alignItems: "center",
             marginBottom: 60,

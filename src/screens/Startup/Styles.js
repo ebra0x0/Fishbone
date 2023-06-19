@@ -1,18 +1,23 @@
 import { StyleSheet } from "react-native";
-import RootColor from "../../RootColor";
 
 const Styles = () => {
     return StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: "#00152d",
+            backgroundColor: "#001023",
         },
         SVG: {
             flex: 1,
         },
         wrapper: {
-            flex: 1,
-            justifyContent: "space-evenly",
+            position: "absolute",
+            width: "100%",
+            bottom: 0,
+            gap: 30,
+            paddingVertical: 30,
+            paddingHorizontal: 15,
+            backgroundColor: "#011631",
+            borderRadius: 30,
         },
         title: {
             paddingLeft: 20,
@@ -21,8 +26,8 @@ const Styles = () => {
         button: {
             flex: 1,
             height: 48,
-            backgroundColor: "#001b3c",
-            borderRadius: 20,
+            backgroundColor: "#001837",
+            borderRadius: 10,
             justifyContent: "center",
             alignItems: "center",
         },

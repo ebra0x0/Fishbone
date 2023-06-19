@@ -27,13 +27,13 @@ const styles = () => {
             alignItems: "center",
         },
         avatar: {
-            width: 120,
-            height: 120,
-            borderRadius: 120 / 2,
+            width: 130,
+            height: 130,
+            borderRadius: 130 / 2,
+            backgroundColor: Root.AVATAR,
         },
         row: {
             flexDirection: lang == "en" ? "row" : "row-reverse",
-            marginVertical: 7,
             height: 60,
             alignItems: "center",
             paddingHorizontal: 20,
