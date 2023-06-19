@@ -10,6 +10,7 @@ import styles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import Translations from "../../../Languages";
 import { memo } from "react";
+import PickTime from "../../../Components/PickTime/PickTime";
 
 const AccountType = (props) => {
     const Styles = styles();
@@ -19,6 +20,10 @@ const AccountType = (props) => {
     const [location, setLocation] = useState(null);
     const [fullName, setFullName] = useState({ value: "", valid: null, err: "" });
     const [address, setAddress] = useState({ value: "", valid: null, err: "" });
+    const [closingTime, setClosingTime] = useState({
+        value: firestore.Timestamp.now().toDate(),
+        valid: rest ? false : true,
+    });
     const [verifyedPhone, setVerifyedPhone] = useState("");
     const [allDone, setAllDone] = useState(false);
 
@@ -38,12 +43,12 @@ const AccountType = (props) => {
     };
 
     useEffect(() => {
-        if (location && verifyedPhone && address && fullName.valid && data?.photo) {
+        if (location && verifyedPhone && closingTime.valid && address && fullName.valid && data?.photo) {
             setAllDone(true);
         } else {
             setAllDone(false);
         }
-    }, [location, verifyedPhone, address, fullName, data?.photo]);
+    }, [location, verifyedPhone, closingTime, address, fullName, data?.photo]);
 
     const updateMapState = (location) => {
         location && setLocation(location);
@@ -85,7 +90,7 @@ const AccountType = (props) => {
         }
     };
 
-    const SubmitData = async (location, fullName, address, verifyedPhone) => {
+    const SubmitData = async (location, fullName, address, verifyedPhone, closingTime) => {
         const MetaData = {
             verified: true,
             Name: fullName,
@@ -96,6 +101,9 @@ const AccountType = (props) => {
             address: address,
             photo: data?.photo,
         };
+        if (closingTime) {
+            MetaData.closingTime = closingTime;
+        }
 
         setLoading(true);
 
@@ -122,7 +130,7 @@ const AccountType = (props) => {
                     <View style={Styles.avatarCont}>
                         <Avatar style={Styles.avatar} upload={true} disabled={loading} />
                     </View>
-                    <View style={{ height: 450 }}>
+                    <View style={{ height: 450, gap: 10 }}>
                         <TouchableOpacity
                             style={Styles.row}
                             onPress={() => {
@@ -225,6 +233,7 @@ const AccountType = (props) => {
                         {address.err && <Text style={Styles.err}>{address.err}</Text>}
 
                         <VirifyPhone updatePhone={setVerifyedPhone} disabled={loading} />
+                        {rest && <PickTime time={setClosingTime} loading={loading} closing={true} />}
                     </View>
                 </KeyboardAwareScrollView>
             </View>
@@ -232,7 +241,15 @@ const AccountType = (props) => {
                 <TouchableOpacity
                     disabled={!allDone}
                     style={[Styles.saveBtn, allDone && Styles.ActiveBtn]}
-                    onPress={() => SubmitData(location, fullName.value, address.value, verifyedPhone)}
+                    onPress={() =>
+                        SubmitData(
+                            location,
+                            fullName.value,
+                            address.value,
+                            verifyedPhone,
+                            rest && closingTime.value
+                        )
+                    }
                 >
                     {loading ? (
                         <ActivityIndicator size={30} color="#fff" />
