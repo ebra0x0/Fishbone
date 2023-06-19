@@ -2,21 +2,20 @@ import React from "react";
 import firestore from "@react-native-firebase/firestore";
 import SendNotification from "./SendNotification";
 import { Toast } from "native-base";
-import TOAST from "./Toast/Toast";
+import TOAST from "./TOAST/TOAST";
 import Check_Post_Expired from "./CheckPostExpired";
-
-const $Posts_Ref = firestore().collection("posts");
 
 const SendOrder = async (props) => {
     try {
-        const { id, key } = props.item;
+        const { source, dest, key, Name, Token, photo, expiresAt } = props.item;
 
+        const $Posts_Ref = firestore().collection("posts");
         const $Users_Ref = firestore().collection("users");
-        const $User_Ref = firestore().collection("users").doc(props.userId);
+        const $User_Ref = firestore().collection("users").doc(source);
 
-        const check = await Check_Post_Expired(key);
+        const expired = await Check_Post_Expired(key, expiresAt);
 
-        if (!check) {
+        if (!expired) {
             props.loading(true);
 
             await $Posts_Ref
@@ -26,10 +25,13 @@ const SendOrder = async (props) => {
                     if (post.exists) {
                         const timestamp = firestore.FieldValue.serverTimestamp();
                         const orderData = {
-                            source: props.userId,
-                            dest: id,
+                            source: source,
+                            dest: dest,
                             date: timestamp,
                             postId: key,
+                            Name,
+                            Token,
+                            photo,
                             seened: true,
                         };
                         // create new order
@@ -37,31 +39,22 @@ const SendOrder = async (props) => {
                             .collection("orders")
                             .add(orderData)
                             .then(async (order) => {
-                                // Add order for restaurant post orders
-                                await $Users_Ref
-                                    .doc(id)
-                                    .collection("posts")
-                                    .doc(key)
-                                    .collection("orders")
-                                    .doc(order.id)
-                                    .set({ ...orderData, seened: false });
-
                                 // Add order for restaurant orders
                                 await $Users_Ref
-                                    .doc(id)
+                                    .doc(dest)
                                     .collection("orders")
                                     .doc(order.id)
                                     .set({ ...orderData, seened: false });
 
-                                props.loading(false);
                                 const RestToken = await $Users_Ref
-                                    .doc(id)
+                                    .doc(dest)
                                     .get()
                                     .then((query) => query.data().Token);
+
                                 SendNotification({
                                     token: RestToken,
                                     title: "New Order",
-                                    msg: `You got a new order from ${props.userId} check it out`,
+                                    msg: `You got a new order from ${source} check it out`,
                                     extraData: { orderKey: order.id },
                                 });
                                 Toast.show({
@@ -70,10 +63,10 @@ const SendOrder = async (props) => {
                                     },
                                     duration: 2000,
                                 });
+                                props.loading(false);
                             });
                     } else {
                         props.loading(false);
-
                         Toast.show({
                             render: () => {
                                 return <TOAST status="error" msg="This post has been removed!" />;
