@@ -70,7 +70,7 @@ const FlatlistOrders = ({ route }) => {
         },
     ];
     const HeaderButtons = Buttons.map((btn) => {
-        if (!btn.show) {
+        if (btn.show) {
             return (
                 <TouchableOpacity style={{ marginLeft: 15 }} key={btn.key} onPress={() => btn.fun()}>
                     <Image style={{ width: btn.size, height: btn.size }} source={btn.name} />
