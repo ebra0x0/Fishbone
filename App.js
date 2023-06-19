@@ -17,7 +17,7 @@ import firestore from "@react-native-firebase/firestore";
 import messaging from "@react-native-firebase/messaging";
 import { decode, encode } from "base-64";
 import { NativeBaseProvider, Toast } from "native-base";
-import TOAST from "./src/Components/Toast/Toast";
+import TOAST from "./src/Components/TOAST/TOAST";
 import Alert from "./src/Components/Alert/Alert";
 
 if (!global.btoa) {
@@ -49,24 +49,13 @@ const App = () => {
         Net_State();
         Get_Token();
         Notifications_Listeners();
-
-        auth()
-            .currentUser?.reload()
-            .catch(() => {
-                Toast.show({
-                    render: () => {
-                        return <TOAST status="error" msg="Your account has been deleted!" />;
-                    },
-                    duration: 2000,
-                });
-            });
+        Refresh_User();
 
         auth().onAuthStateChanged(async (session) => {
             if (session) {
                 Get_User(session);
             } else {
                 setUserData(null);
-                store.dispatch({ type: "userData/Del_User" });
                 setBooting(false);
             }
         });
@@ -79,6 +68,9 @@ const App = () => {
             setLogged(false);
         }
     }, [userData]);
+    useEffect(() => {
+        !logged && store.dispatch({ type: "userData/Del_User" });
+    }, [logged]);
 
     useEffect(() => {
         Token && store.dispatch({ type: "userData/Set_Token", payload: Token });
@@ -140,12 +132,28 @@ const App = () => {
         }
     };
 
+    const Refresh_User = () => {
+        auth()
+            .currentUser?.reload()
+            .catch(async () => {
+                await auth().signOut();
+                setUserData(null);
+                store.dispatch({ type: "userData/Del_User" });
+                Toast.show({
+                    render: () => {
+                        return <TOAST status="error" msg="Unable to find your account!" />;
+                    },
+                    duration: 2000,
+                });
+            });
+    };
+
     const Get_User = async (user) => {
         try {
             $UserRef.doc(user?.uid).onSnapshot((querySnapshot) => {
                 if (querySnapshot?.exists) {
-                    store.dispatch({ type: "userData/Set_User", payload: querySnapshot?.data() });
                     setUserData(querySnapshot?.data());
+                    store.dispatch({ type: "userData/Set_User", payload: querySnapshot?.data() });
                 } else {
                     setBooting(false);
                 }
@@ -181,7 +189,7 @@ const App = () => {
                         store.dispatch({ type: "userData/Set_Lang", payload: item });
                         break;
                     case "MESSAGES":
-                        item && Handle_Msgs(item);
+                        item && Handle_Msgs(JSON.parse(item));
                         break;
                 }
             });
